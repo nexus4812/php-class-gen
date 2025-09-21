@@ -25,7 +25,7 @@ final class Application extends SymfonyApplication
      */
     public function __construct(?string $configPath = null)
     {
-        parent::__construct('PHP Class Generator', '0.0.1');
+        parent::__construct('PHP Class Generator', '0.0.2');
         $this->loadPhpGenConfig($configPath);
     }
     /**

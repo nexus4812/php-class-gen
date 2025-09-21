@@ -15,6 +15,10 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * @example
+ * ./bin/php-gen query:generate User FindUserById --dry-run -vv
+ */
 #[AsCommand(
     name: 'query:generate',
     description: 'Generate Laravel CQRS Query interface, implementation, and test'
@@ -98,19 +102,8 @@ class LaravelCqrsQueryCommand extends Command
      */
     private function createQueryInterface(InputInterface $input): Builder
     {
-        $builder = Builder::createInterface(self::getInterfaceName($input))
-            ->addUse('Illuminate\\Container\\Attributes\\Bind')
-            ->addUse(self::getResultName($input))
-            ->addUse(self::getImplementationName($input))
-            ->addUse(self::getResultName($input))
-        ;
-
-        if (!$input->getOption('no-query')) {
-            $builder->addUse(self::getQueryName($input));
-        }
-
-        return $builder
-            ->defineStructure(function (InterfaceType $interface) use ($input) {
+        return Builder::createInterface(self::getInterfaceName($input))
+            ->defineStructure(function (InterfaceType $interface) use ($input): InterfaceType {
                 $queryNameArg = $input->getArgument('queryName');
                 $queryName = is_string($queryNameArg) ? $queryNameArg : '';
                 $interface->addAttribute('Illuminate\\Container\\Attributes\\Bind', [
@@ -137,23 +130,12 @@ class LaravelCqrsQueryCommand extends Command
      */
     private function createQueryImplementation(InputInterface $input): Builder
     {
-        $interfaceName = self::getInterfaceName($input);
-
-        $builder = Builder::createClass(self::getImplementationName($input))
-            ->addUse(self::getInterfaceName($input))
-            ->addUse(self::getResultName($input))
-        ;
-
-        if (!$input->getOption('no-query')) {
-            $builder->addUse(self::getQueryName($input));
-        }
-
-        return $builder
-            ->defineStructure(function (ClassType $class) use ($interfaceName, $input) {
+        return Builder::createClass(self::getImplementationName($input))
+            ->defineStructure(function (ClassType $class) use ($input) {
                 $class
                     ->setFinal()
                     ->setReadOnly()
-                    ->addImplement($interfaceName);
+                    ->addImplement(self::getInterfaceName($input));
 
                 // Add constructor for dependency injection
                 $constructor = $class->addMethod('__construct');
@@ -228,10 +210,6 @@ class LaravelCqrsQueryCommand extends Command
     private function createQueryTest(InputInterface $input): Builder
     {
         return Builder::createClass(self::getImplementationTestName($input))
-            ->addUse('Tests\\TestCase')
-            ->addUse(self::getImplementationName($input))
-            ->addUse('Illuminate\\Foundation\\Testing\\RefreshDatabase')
-            ->addUse('PHPUnit\\Framework\\Attributes\\Test')
             ->defineStructure(function (ClassType $class) use ($input) {
                 $class->setExtends('Tests\\TestCase');
                 $class->addTrait('Illuminate\\Foundation\\Testing\\RefreshDatabase');
