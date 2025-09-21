@@ -47,52 +47,60 @@ class LaravelCqrsQueryCommand extends Command
         $builder->add($this->createQueryTest($input));
     }
 
-    protected static function getInterfaceName(InputInterface $input): string
+    /**
+     * Get the query name from input arguments
+     */
+    private static function getQueryNameFromInput(InputInterface $input): string
     {
         $queryNameArg = $input->getArgument('queryName');
+        return is_string($queryNameArg) ? $queryNameArg : '';
+    }
+
+    /**
+     * Get the context from input arguments
+     */
+    private static function getContextFromInput(InputInterface $input): string
+    {
         $contextArg = $input->getArgument('context');
-        $queryName = is_string($queryNameArg) ? $queryNameArg : '';
-        $context = is_string($contextArg) ? $contextArg : '';
+        return is_string($contextArg) ? $contextArg : '';
+    }
+
+    protected static function getInterfaceName(InputInterface $input): string
+    {
+        $queryName = self::getQueryNameFromInput($input);
+        $context = self::getContextFromInput($input);
 
         return "App\\Contracts\\Query\\{$context}\\{$queryName}QueryHandler";
     }
 
     protected static function getQueryName(InputInterface $input): string
     {
-        $queryNameArg = $input->getArgument('queryName');
-        $contextArg = $input->getArgument('context');
-        $queryName = is_string($queryNameArg) ? $queryNameArg : '';
-        $context = is_string($contextArg) ? $contextArg : '';
+        $queryName = self::getQueryNameFromInput($input);
+        $context = self::getContextFromInput($input);
 
         return "App\\Contracts\\Query\\{$context}\\{$queryName}Query";
     }
 
     protected static function getResultName(InputInterface $input): string
     {
-        $queryNameArg = $input->getArgument('queryName');
-        $contextArg = $input->getArgument('context');
-        $queryName = is_string($queryNameArg) ? $queryNameArg : '';
-        $context = is_string($contextArg) ? $contextArg : '';
+        $queryName = self::getQueryNameFromInput($input);
+        $context = self::getContextFromInput($input);
 
         return "App\\Contracts\\Query\\{$context}\\{$queryName}Result";
     }
 
     protected static function getImplementationName(InputInterface $input): string
     {
-        $queryNameArg = $input->getArgument('queryName');
-        $contextArg = $input->getArgument('context');
-        $queryName = is_string($queryNameArg) ? $queryNameArg : '';
-        $context = is_string($contextArg) ? $contextArg : '';
+        $queryName = self::getQueryNameFromInput($input);
+        $context = self::getContextFromInput($input);
 
         return "App\\Infrastructure\\Query\\{$context}\\{$queryName}QueryHandlerImplementation";
     }
 
     protected static function getImplementationTestName(InputInterface $input): string
     {
-        $queryNameArg = $input->getArgument('queryName');
-        $contextArg = $input->getArgument('context');
-        $queryName = is_string($queryNameArg) ? $queryNameArg : '';
-        $context = is_string($contextArg) ? $contextArg : '';
+        $queryName = self::getQueryNameFromInput($input);
+        $context = self::getContextFromInput($input);
 
         return "Tests\\Feature\\Infrastructure\\Query\\{$context}\\{$queryName}QueryHandlerImplementationTest";
     }
@@ -104,8 +112,7 @@ class LaravelCqrsQueryCommand extends Command
     {
         return Builder::createInterface(self::getInterfaceName($input))
             ->defineStructure(function (InterfaceType $interface) use ($input): InterfaceType {
-                $queryNameArg = $input->getArgument('queryName');
-                $queryName = is_string($queryNameArg) ? $queryNameArg : '';
+                $queryName = self::getQueryNameFromInput($input);
                 $interface->addAttribute('Illuminate\\Container\\Attributes\\Bind', [
                     new Literal("{$queryName}QueryHandlerImplementation::class"),
                 ]);
@@ -221,8 +228,7 @@ class LaravelCqrsQueryCommand extends Command
                 // Add setUp method
                 $setUp = $class->addMethod('setUp');
                 $setUp->setReturnType('void');
-                $queryNameArg = $input->getArgument('queryName');
-                $queryName = is_string($queryNameArg) ? $queryNameArg : '';
+                $queryName = self::getQueryNameFromInput($input);
                 $implementationClass = "{$queryName}QueryHandlerImplementation";
                 $setUp->setBody(
                     'parent::setUp();' . PHP_EOL . PHP_EOL .
