@@ -1,0 +1,27 @@
+includes:
+    # - vendor/shipmonk/dead-code-detector/rules.neon
+    - vendor/phpat/phpat/extension.neon
+    # - vendor/phpstan/phpstan-strict-rules/rules.neon
+
+services:
+    -
+        class: Tests\Architecture\DependencyRulesTest
+        tags:
+            - phpat.test
+
+parameters:
+    phpat:
+        ignore_built_in_classes: true
+        show_rule_names: true
+    level: max
+    paths:
+        - src
+        - phpgen.php
+        - bin
+    excludePaths:
+        - generated/ (?)
+        - src/App/ (?)
+        - src/Tests/ (?)
+    scanDirectories:
+        - src
+    reportUnmatchedIgnoredErrors: false

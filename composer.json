@@ -1,0 +1,54 @@
+{
+    "name": "php-gen/class-generator",
+    "description": "PHP code generator for repositories, entities, and tests with DSL support",
+    "type": "library",
+    "keywords": ["php", "generator", "repository", "entity", "code-generation", "dsl"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "PHP Gen Team"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "symfony/console": "^6.0|^7.0",
+        "nette/php-generator": "^4.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.87",
+        "phpat/phpat": "^0.12.0",
+        "phpstan/phpstan": "^2.0",
+        "phpstan/phpstan-strict-rules": "^2.0",
+        "phpunit/phpunit": "^10.0|^11.0",
+        "shipmonk/dead-code-detector": "^0.13.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "PhpGen\\ClassGenerator\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/",
+            "Generated\\": "generated/",
+            "MyProject\\": "generated/MyProject/"
+        }
+    },
+    "bin": [
+        "bin/php-gen"
+    ],
+    "scripts": {
+        "phpstan": "phpstan analyse",
+        "phpstan-baseline": "phpstan analyse --generate-baseline",
+        "automatic-removal-of-dead-code": "phpstan analyse --error-format removeDeadCode",
+        "test": "phpunit",
+        "cs-fix": "php-cs-fixer fix",
+        "cs-fix-dry": "php-cs-fixer fix --dry-run --diff --verbose",
+        "check": ["@phpstan", "@cs-fix-dry", "@test"]
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

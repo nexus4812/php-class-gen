@@ -1,0 +1,34 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use PhpGen\ClassGenerator\Console\Application;
+
+// Check if we're in a Composer install or development environment
+$autoloaders = [
+    __DIR__ . '/../vendor/autoload.php', // Development
+    __DIR__ . '/../../../autoload.php', // Composer install
+];
+
+$autoloader = null;
+foreach ($autoloaders as $file) {
+    if (file_exists($file)) {
+        $autoloader = require $file;
+        break;
+    }
+}
+
+if ($autoloader === null) {
+    fwrite(STDERR, "Error: Could not find Composer autoloader.\n");
+    fwrite(STDERR, "Please run 'composer install' first.\n");
+    exit(1);
+}
+
+try {
+    $application = new Application();
+    $application->run();
+} catch (Exception $e) {
+    fwrite(STDERR, "Error: " . $e->getMessage() . "\n");
+    exit(1);
+}
