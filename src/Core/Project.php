@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhpGen\ClassGenerator\Core;
 
 use PhpGen\ClassGenerator\Config\PhpGenConfig;
-use PhpGen\ClassGenerator\Builder\Builder;
+use PhpGen\ClassGenerator\Builder\BluePrint;
 use PhpGen\ClassGenerator\Builder\BuilderInterface;
 use RuntimeException;
 use Throwable;
@@ -28,28 +28,25 @@ use Throwable;
  *         ->when('interface', fn() => $this->context->getOption('with-interface'));
  * }
  */
-class GenerationCollection
+class Project
 {
-    private PhpGenConfig $config;
-
     /**
      * @var array<string, callable> Factory functions for each file type
      */
     private array $factories = [];
 
 
-    public function __construct(PhpGenConfig $config)
+    public function __construct()
     {
-        $this->config = $config;
     }
 
     /**
      * Add a pre-configured builder directly to the generation
      *
-     * @param Builder $builder Pre-configured UniversalBuilder instance
+     * @param BluePrint $builder Pre-configured UniversalBuilder instance
      * @return void
      */
-    private function addBuilder(Builder $builder): void
+    private function addBuilder(BluePrint $builder): void
     {
         $fullyQualifiedName = $builder->getFullyQualifiedName();
 
@@ -72,10 +69,10 @@ class GenerationCollection
      * The UniversalBuilder already contains the type information (interface, class, trait)
      * so no additional type specification is needed.
      *
-     * @param Builder $builder Pre-configured UniversalBuilder instance
+     * @param BluePrint $builder Pre-configured UniversalBuilder instance
      * @return self Returns the builder instance for method chaining
      */
-    public function add(Builder $builder): self
+    public function add(BluePrint $builder): self
     {
         $this->addBuilder($builder);
         return $this;
@@ -86,9 +83,9 @@ class GenerationCollection
      *
      * @return Generator The configured generator ready for execution
      */
-    public function build(): Generator
+    public function build(PhpGenConfig $config): Generator
     {
-        $generator = Generator::create($this->config);
+        $generator = Generator::create($config);
 
         // Process in the order they were added
         foreach (array_keys($this->factories) as $type) {

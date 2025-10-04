@@ -10,9 +10,6 @@ use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\InterfaceType;
 use Nette\PhpGenerator\TraitType;
 use Nette\PhpGenerator\Method;
-use Nette\PhpGenerator\Property;
-use Nette\PhpGenerator\Attribute;
-use Nette\PhpGenerator\Literal;
 
 final class DependencyExtractorTest extends TestCase
 {

@@ -8,7 +8,8 @@ use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\InterfaceType;
 use Nette\PhpGenerator\Literal;
 use Nette\PhpGenerator\Property;
-use PhpGen\ClassGenerator\Builder\Builder;
+use PhpGen\ClassGenerator\Builder\BluePrint;
+use PhpGen\ClassGenerator\Core\Project;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -33,18 +34,20 @@ class LaravelCqrsQueryCommand extends Command
             ->addOption('no-query', null, InputOption::VALUE_NONE, 'Skip generating the Query class');
     }
 
-    protected function handle(InputInterface $input, OutputInterface $output): void
+    protected function handle(InputInterface $input, OutputInterface $output): Project
     {
-        $builder = $this->getBuilder();
+        $project = new Project();
 
-        $builder->add($this->createQueryInterface($input));
+        $project->add($this->createQueryInterface($input));
         if (!$input->getOption('no-query')) {
-            $builder->add($this->createQuery($input));
+            $project->add($this->createQuery($input));
         }
 
-        $builder->add($this->createResult($input));
-        $builder->add($this->createQueryImplementation($input));
-        $builder->add($this->createQueryTest($input));
+        $project->add($this->createResult($input));
+        $project->add($this->createQueryImplementation($input));
+        $project->add($this->createQueryTest($input));
+
+        return $project;
     }
 
     /**
@@ -108,9 +111,9 @@ class LaravelCqrsQueryCommand extends Command
     /**
      * Create the query handler interface
      */
-    private function createQueryInterface(InputInterface $input): Builder
+    private function createQueryInterface(InputInterface $input): BluePrint
     {
-        return Builder::createInterface(self::getInterfaceName($input))
+        return BluePrint::createInterface(self::getInterfaceName($input))
             ->defineStructure(function (InterfaceType $interface) use ($input): InterfaceType {
                 $queryName = self::getQueryNameFromInput($input);
                 $interface->addAttribute('Illuminate\\Container\\Attributes\\Bind', [
@@ -135,9 +138,9 @@ class LaravelCqrsQueryCommand extends Command
     /**
      * Create the query handler implementation
      */
-    private function createQueryImplementation(InputInterface $input): Builder
+    private function createQueryImplementation(InputInterface $input): BluePrint
     {
-        return Builder::createClass(self::getImplementationName($input))
+        return BluePrint::createClass(self::getImplementationName($input))
             ->defineStructure(function (ClassType $class) use ($input) {
                 $class
                     ->setFinal()
@@ -168,9 +171,9 @@ class LaravelCqrsQueryCommand extends Command
     /**
      * Create the query class
      */
-    private function createQuery(InputInterface $input): Builder
+    private function createQuery(InputInterface $input): BluePrint
     {
-        return Builder::createClass(self::getQueryName($input))
+        return BluePrint::createClass(self::getQueryName($input))
             ->defineStructure(function (ClassType $class) {
                 $class
                     ->setFinal()
@@ -191,9 +194,9 @@ class LaravelCqrsQueryCommand extends Command
     /**
      * Create the result class
      */
-    private function createResult(InputInterface $input): Builder
+    private function createResult(InputInterface $input): BluePrint
     {
-        return Builder::createClass(self::getResultName($input))
+        return BluePrint::createClass(self::getResultName($input))
             ->defineStructure(function (ClassType $class) {
                 $class
                     ->setFinal()
@@ -214,9 +217,9 @@ class LaravelCqrsQueryCommand extends Command
     /**
      * Create the feature test
      */
-    private function createQueryTest(InputInterface $input): Builder
+    private function createQueryTest(InputInterface $input): BluePrint
     {
-        return Builder::createClass(self::getImplementationTestName($input))
+        return BluePrint::createClass(self::getImplementationTestName($input))
             ->defineStructure(function (ClassType $class) use ($input) {
                 $class->setExtends('Tests\\TestCase');
                 $class->addTrait('Illuminate\\Foundation\\Testing\\RefreshDatabase');

@@ -114,7 +114,7 @@ vendor/bin/php-gen query:generate GetUser User
 namespace App\Commands;
 
 use Nette\PhpGenerator\ClassType;
-use PhpGen\ClassGenerator\Builder\Builder;
+use PhpGen\ClassGenerator\Builder\BluePrint;
 use PhpGen\ClassGenerator\Console\Commands\Command;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -143,11 +143,11 @@ final class ModelGeneratorCommand extends Command
         $builder->add($this->createMigration($modelName));
     }
 
-    private function createModel(string $modelName): Builder
+    private function createModel(string $modelName): BluePrint
     {
         $className = $this->config->resolveNamespace("Models\\{$modelName}");
 
-        return Builder::createClass($className)
+        return BluePrint::createClass($className)
             ->defineStructure(function (ClassType $class) use ($modelName) {
                 $class->setExtends('Illuminate\\Database\\Eloquent\\Model')
                       ->setFinal();
@@ -162,11 +162,11 @@ final class ModelGeneratorCommand extends Command
             });
     }
 
-    private function createFactory(string $modelName): Builder
+    private function createFactory(string $modelName): BluePrint
     {
         $className = $this->config->resolveNamespace("Database\\Factories\\{$modelName}Factory");
 
-        return Builder::createClass($className)
+        return BluePrint::createClass($className)
             ->defineStructure(function (ClassType $class) use ($modelName) {
                 $class->setExtends('Illuminate\\Database\\Eloquent\\Factories\\Factory');
 
@@ -181,12 +181,12 @@ final class ModelGeneratorCommand extends Command
             });
     }
 
-    private function createMigration(string $modelName): Builder
+    private function createMigration(string $modelName): BluePrint
     {
         $tableName = strtolower($modelName) . 's';
         $className = $this->config->resolveNamespace("Database\\Migrations\\Create{$modelName}sTable");
 
-        return Builder::createClass($className)
+        return BluePrint::createClass($className)
             ->defineStructure(function (ClassType $class) use ($tableName) {
                 $class->setExtends('Illuminate\\Database\\Migrations\\Migration');
 

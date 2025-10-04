@@ -19,7 +19,7 @@ use InvalidArgumentException;
  * with use statements and configuration callbacks. It acts as a facade
  * over ElementSpec and FileAssembler classes.
  */
-final class Builder implements BuilderInterface
+final class BluePrint implements BuilderInterface
 {
     private ElementSpec $spec;
     private bool $autoGenerateUses = true;
@@ -40,17 +40,17 @@ final class Builder implements BuilderInterface
 
     public static function createClass(string $fullyQualifiedName): self
     {
-        return new Builder($fullyQualifiedName, ClassType::class);
+        return new BluePrint($fullyQualifiedName, ClassType::class);
     }
 
     public static function createInterface(string $fullyQualifiedName): self
     {
-        return new Builder($fullyQualifiedName, InterfaceType::class);
+        return new BluePrint($fullyQualifiedName, InterfaceType::class);
     }
 
     public static function createEnum(string $fullyQualifiedName): self
     {
-        return new Builder($fullyQualifiedName, EnumType::class);
+        return new BluePrint($fullyQualifiedName, EnumType::class);
     }
 
     /**

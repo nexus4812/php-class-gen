@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace PhpGen\ClassGenerator\Console\Commands;
 
 use Nette\PhpGenerator\ClassType;
-use PhpGen\ClassGenerator\Builder\Builder;
+use PhpGen\ClassGenerator\Builder\BluePrint;
+use PhpGen\ClassGenerator\Core\Project;
 use PhpGen\ClassGenerator\Core\PropertyTypeParser;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -31,8 +32,10 @@ class CreateDtoCommand extends Command
             ->addOption('properties', 'p', InputOption::VALUE_OPTIONAL, 'Properties (format: name:type,email:string)', 'id:int');
     }
 
-    protected function handle(InputInterface $input, OutputInterface $output): void
+    protected function handle(InputInterface $input, OutputInterface $output): Project
     {
+        $project = new Project();
+
         $name = $input->getArgument('fully-qualified-name');
         $propertiesString = $input->getOption('properties');
 
@@ -44,26 +47,27 @@ class CreateDtoCommand extends Command
             throw new InvalidArgumentException('Properties must be a string');
         }
 
-        $builder = $this->getBuilder();
-        $builder->add($this->createDto($name, $propertiesString ?? 'id:int'));
+        $project->add($this->createDto($name, $propertiesString ?? 'id:int'));
+
+        return $project;
     }
 
-    private function createDto(string $name, string $propertiesString): Builder
+    private function createDto(string $name, string $propertiesString): BluePrint
     {
         $properties = PropertyTypeParser::parse($propertiesString);
 
-        return Builder::createClass($name)
+        return BluePrint::createClass($name)
             ->defineStructure(function (ClassType $class) use ($properties) {
                 $class->setFinal()
-                     ->setReadOnly();
+                    ->setReadOnly();
 
                 // Add constructor with promoted parameters
                 $constructor = $class->addMethod('__construct');
 
                 foreach ($properties as $propertyName => $propertyType) {
                     $constructor->addPromotedParameter($propertyName)
-                              ->setType($propertyType)
-                              ->setPublic();
+                        ->setType($propertyType)
+                        ->setPublic();
                 }
 
                 return $class;
