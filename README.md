@@ -147,7 +147,7 @@ final class ModelGeneratorCommand extends Command
     {
         $className = $this->config->resolveNamespace("Models\\{$modelName}");
 
-        return BluePrint::createClass($className)
+        return BluePrint::createEmptyClass($className)
             ->defineStructure(function (ClassType $class) use ($modelName) {
                 $class->setExtends('Illuminate\\Database\\Eloquent\\Model')
                       ->setFinal();
@@ -166,7 +166,7 @@ final class ModelGeneratorCommand extends Command
     {
         $className = $this->config->resolveNamespace("Database\\Factories\\{$modelName}Factory");
 
-        return BluePrint::createClass($className)
+        return BluePrint::createEmptyClass($className)
             ->defineStructure(function (ClassType $class) use ($modelName) {
                 $class->setExtends('Illuminate\\Database\\Eloquent\\Factories\\Factory');
 
@@ -186,7 +186,7 @@ final class ModelGeneratorCommand extends Command
         $tableName = strtolower($modelName) . 's';
         $className = $this->config->resolveNamespace("Database\\Migrations\\Create{$modelName}sTable");
 
-        return BluePrint::createClass($className)
+        return BluePrint::createEmptyClass($className)
             ->defineStructure(function (ClassType $class) use ($tableName) {
                 $class->setExtends('Illuminate\\Database\\Migrations\\Migration');
 

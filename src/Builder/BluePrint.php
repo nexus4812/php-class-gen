@@ -26,11 +26,9 @@ final class BluePrint implements BuilderInterface
     private DependencyExtractor $dependencyExtractor;
 
     /**
-     * Create a new Builder instance
-     *
-     * @param string $fullyQualifiedName The fully qualified name of the element to generate
-     * @param string $netteTypeClass The Nette type class (InterfaceType::class, ClassType::class, TraitType::class)
-     * @param DependencyExtractor|null $dependencyExtractor Optional dependency extractor (creates new instance if null)
+     * @param string $fullyQualifiedName
+     * @param string $netteTypeClass
+     * @param DependencyExtractor|null $dependencyExtractor
      */
     public function __construct(string $fullyQualifiedName, string $netteTypeClass, ?DependencyExtractor $dependencyExtractor = null)
     {
@@ -38,20 +36,48 @@ final class BluePrint implements BuilderInterface
         $this->dependencyExtractor = $dependencyExtractor ?? new DependencyExtractor();
     }
 
-    public static function createClass(string $fullyQualifiedName): self
+    public static function createEmptyClass(string $fullyQualifiedName): self
     {
         return new BluePrint($fullyQualifiedName, ClassType::class);
     }
 
-    public static function createInterface(string $fullyQualifiedName): self
+    /**
+     * @param string $fullyQualifiedName
+     * @param callable(ClassType): ClassType $structure
+     * @return self
+     */
+    public static function createClass(string $fullyQualifiedName, callable $structure): self
+    {
+        $bluePrint = self::createEmptyClass($fullyQualifiedName);
+        $bluePrint->defineStructure($structure);
+
+        return $bluePrint;
+    }
+
+    public static function createEmptyInterface(string $fullyQualifiedName): self
     {
         return new BluePrint($fullyQualifiedName, InterfaceType::class);
+    }
+
+    /**
+     * @param string $fullyQualifiedName
+     * @param callable(InterfaceType): InterfaceType $structure
+     * @return self
+     */
+    public static function createInterface(string $fullyQualifiedName, callable $structure): self
+    {
+        $bluePrint = self::createEmptyInterface($fullyQualifiedName);
+        $bluePrint->defineStructure($structure);
+
+        return $bluePrint;
     }
 
     public static function createEnum(string $fullyQualifiedName): self
     {
         return new BluePrint($fullyQualifiedName, EnumType::class);
     }
+
+
 
     /**
      * Add a use statement to the file
@@ -87,29 +113,9 @@ final class BluePrint implements BuilderInterface
         return $this;
     }
 
-
     /**
-     * Configure the element with a callback
-     *
-     * This method allows you to configure the generated element using a callback function.
-     * The callback receives the appropriate Nette type instance and must return the same instance.
-     * If auto use generation is enabled, it will automatically extract dependencies from the configured element.
-     *
-     * @param callable $configurator A closure that receives and returns the appropriate Nette type instance
-     * @return static Returns the builder instance for method chaining
-     *
-     * @example Interface configuration:
-     * $builder->configure(function (InterfaceType $interface): InterfaceType {
-     *     $interface->addMethod('process')->addParameter('data')->setType('array');
-     *     return $interface;
-     * });
-     *
-     * @example Class configuration:
-     * $builder->configure(function (ClassType $class): ClassType {
-     *     $class->setFinal()->addImplement('SomeInterface');
-     *     $class->addMethod('execute')->setBody('// implementation');
-     *     return $class;
-     * });
+     * @param callable $configurator
+     * @return $this
      */
     public function defineStructure(callable $configurator): self
     {

@@ -113,26 +113,25 @@ class LaravelCqrsQueryCommand extends Command
      */
     private function createQueryInterface(InputInterface $input): BluePrint
     {
-        return BluePrint::createInterface(self::getInterfaceName($input))
-            ->defineStructure(function (InterfaceType $interface) use ($input): InterfaceType {
-                $queryName = self::getQueryNameFromInput($input);
-                $interface->addAttribute('Illuminate\\Container\\Attributes\\Bind', [
-                    new Literal("{$queryName}QueryHandlerImplementation::class"),
-                ]);
+        return BluePrint::createInterface(self::getInterfaceName($input), function (InterfaceType $interface) use ($input): InterfaceType {
+            $queryName = self::getQueryNameFromInput($input);
+            $interface->addAttribute('Illuminate\\Container\\Attributes\\Bind', [
+                new Literal("{$queryName}QueryHandlerImplementation::class"),
+            ]);
 
-                $handle = $interface->addMethod('handle');
+            $handle = $interface->addMethod('handle');
 
-                if (!$input->getOption('no-query')) {
-                    $handle->addParameter('query')
-                        ->setType(self::getQueryName($input));
-                }
+            if (!$input->getOption('no-query')) {
+                $handle->addParameter('query')
+                    ->setType(self::getQueryName($input));
+            }
 
-                $interface->getMethod('handle')
-                    ->setReturnType(self::getResultName($input))
-                    ->setComment('Execute the query and return the result');
+            $interface->getMethod('handle')
+                ->setReturnType(self::getResultName($input))
+                ->setComment('Execute the query and return the result');
 
-                return $interface;
-            });
+            return $interface;
+        });
     }
 
     /**
@@ -140,7 +139,7 @@ class LaravelCqrsQueryCommand extends Command
      */
     private function createQueryImplementation(InputInterface $input): BluePrint
     {
-        return BluePrint::createClass(self::getImplementationName($input))
+        return BluePrint::createEmptyClass(self::getImplementationName($input))
             ->defineStructure(function (ClassType $class) use ($input) {
                 $class
                     ->setFinal()
@@ -173,22 +172,21 @@ class LaravelCqrsQueryCommand extends Command
      */
     private function createQuery(InputInterface $input): BluePrint
     {
-        return BluePrint::createClass(self::getQueryName($input))
-            ->defineStructure(function (ClassType $class) {
-                $class
-                    ->setFinal()
-                    ->setReadOnly();
+        return BluePrint::createClass(self::getQueryName($input), function (ClassType $class): ClassType {
+            $class
+                ->setFinal()
+                ->setReadOnly();
 
-                // Add constructor with basic parameters
-                $constructor = $class->addMethod('__construct');
-                $constructor->setComment('Query constructor with parameters');
-                $constructor->setBody('// TODO: Add query parameters as needed');
-                $constructor->addPromotedParameter('id')
-                    ->setType('int')
-                    ->setComment('Entity ID');
+            // Add constructor with basic parameters
+            $constructor = $class->addMethod('__construct');
+            $constructor->setComment('Query constructor with parameters');
+            $constructor->setBody('// TODO: Add query parameters as needed');
+            $constructor->addPromotedParameter('id')
+                ->setType('int')
+                ->setComment('Entity ID');
 
-                return $class;
-            });
+            return $class;
+        });
     }
 
     /**
@@ -196,22 +194,21 @@ class LaravelCqrsQueryCommand extends Command
      */
     private function createResult(InputInterface $input): BluePrint
     {
-        return BluePrint::createClass(self::getResultName($input))
-            ->defineStructure(function (ClassType $class) {
-                $class
-                    ->setFinal()
-                    ->setReadOnly();
+        return BluePrint::createClass(self::getResultName($input), static function (ClassType $class): ClassType {
+            $class
+                ->setFinal()
+                ->setReadOnly();
 
-                // Add constructor with result data
-                $constructor = $class->addMethod('__construct');
-                $constructor->setComment('Result constructor with data');
-                $constructor->setBody('// TODO: Add result properties as needed');
-                $constructor->addPromotedParameter('data')
-                    ->setType('mixed')
-                    ->setComment('Query result data');
+            // Add constructor with result data
+            $constructor = $class->addMethod('__construct');
+            $constructor->setComment('Result constructor with data');
+            $constructor->setBody('// TODO: Add result properties as needed');
+            $constructor->addPromotedParameter('data')
+                ->setType('mixed')
+                ->setComment('Query result data');
 
-                return $class;
-            });
+            return $class;
+        });
     }
 
     /**
@@ -219,7 +216,7 @@ class LaravelCqrsQueryCommand extends Command
      */
     private function createQueryTest(InputInterface $input): BluePrint
     {
-        return BluePrint::createClass(self::getImplementationTestName($input))
+        return BluePrint::createEmptyClass(self::getImplementationTestName($input))
             ->defineStructure(function (ClassType $class) use ($input) {
                 $class->setExtends('Tests\\TestCase');
                 $class->addTrait('Illuminate\\Foundation\\Testing\\RefreshDatabase');

@@ -56,22 +56,19 @@ class CreateDtoCommand extends Command
     {
         $properties = PropertyTypeParser::parse($propertiesString);
 
-        return BluePrint::createClass($name)
-            ->defineStructure(function (ClassType $class) use ($properties) {
-                $class->setFinal()
-                    ->setReadOnly();
+        return BluePrint::createClass($name, static function (ClassType $class) use ($properties): ClassType {
+            $class->setFinal()->setReadOnly();
 
-                // Add constructor with promoted parameters
-                $constructor = $class->addMethod('__construct');
+            // Add constructor with promoted parameters
+            $constructor = $class->addMethod('__construct');
 
-                foreach ($properties as $propertyName => $propertyType) {
-                    $constructor->addPromotedParameter($propertyName)
-                        ->setType($propertyType)
-                        ->setPublic();
-                }
+            foreach ($properties as $propertyName => $propertyType) {
+                $constructor->addPromotedParameter($propertyName)
+                    ->setType($propertyType)
+                    ->setPublic();
+            }
 
-                return $class;
-            });
+            return $class;
+        });
     }
-
 }

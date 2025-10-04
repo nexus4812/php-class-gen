@@ -10,24 +10,6 @@ use PhpGen\ClassGenerator\Builder\BuilderInterface;
 use RuntimeException;
 use Throwable;
 
-/**
- * Builder for fine-grained control over file generation
- *
- * This class implements the Builder pattern to provide flexible control
- * over which files are generated and under what conditions. It allows
- * generators to define multiple file types and conditional generation logic.
- *
- * @example Usage in a generator:
- * protected function defineGeneration(GenerationBuilder $builder): void
- * {
- *     $builder
- *         ->addClass('interface', fn() => $this->createInterface())
- *         ->addClass('implementation', fn() => $this->createImplementation())
- *         ->addClass('test', fn() => $this->createTest())
- *         ->when('test', fn() => !$this->context->getOption('skip-tests'))
- *         ->when('interface', fn() => $this->context->getOption('with-interface'));
- * }
- */
 class Project
 {
     /**
@@ -40,12 +22,6 @@ class Project
     {
     }
 
-    /**
-     * Add a pre-configured builder directly to the generation
-     *
-     * @param BluePrint $builder Pre-configured UniversalBuilder instance
-     * @return void
-     */
     private function addBuilder(BluePrint $builder): void
     {
         $fullyQualifiedName = $builder->getFullyQualifiedName();
@@ -62,16 +38,6 @@ class Project
         $this->factories[$uniqueKey] = fn () => $builder;
     }
 
-    /**
-     * Add a pre-configured builder to the generation
-     *
-     * This is the unified API for adding any type of code generation.
-     * The UniversalBuilder already contains the type information (interface, class, trait)
-     * so no additional type specification is needed.
-     *
-     * @param BluePrint $builder Pre-configured UniversalBuilder instance
-     * @return self Returns the builder instance for method chaining
-     */
     public function add(BluePrint $builder): self
     {
         $this->addBuilder($builder);

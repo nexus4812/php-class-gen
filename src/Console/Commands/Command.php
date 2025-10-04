@@ -19,7 +19,6 @@ use Throwable;
 abstract class Command extends SymfonyCommand
 {
     protected PhpGenConfig $config;
-    protected Project $generationCollection;
 
     public function __construct(PhpGenConfig $config)
     {
@@ -39,17 +38,6 @@ abstract class Command extends SymfonyCommand
      * @return Project
      */
     abstract protected function handle(InputInterface $input, OutputInterface $output): Project;
-
-    /**
-     * Add a builder to the generation collection
-     *
-     * @param BluePrint $builder The builder to add
-     * @return void
-     */
-    protected function add(BluePrint $builder): void
-    {
-        $this->generationCollection->add($builder);
-    }
 
     final protected function configure(): void
     {
