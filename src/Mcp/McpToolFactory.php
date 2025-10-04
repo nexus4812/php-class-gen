@@ -20,7 +20,6 @@ use Throwable;
 final class McpToolFactory
 {
     public function __construct(
-        private readonly PhpGenConfig $config,
         private readonly CommandDiscovery $discovery
     ) {
     }

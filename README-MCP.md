@@ -27,8 +27,8 @@ composer install
 {
   "mcpServers": {
     "phpgen": {
-      "command": "php",
-      "args": ["/absolute/path/to/your/project/mcp-phpgen-server.php"]
+      "command": "/absolute/path/to/your/project/bin/php-gen",
+      "args": ["mcp:server"]
     }
   }
 }
@@ -90,11 +90,14 @@ Laravel CQRSクエリコンポーネントを生成します。
 MCPサーバーが正しく動作することを確認：
 
 ```bash
+# 利用可能なMCPツールを確認
+./bin/php-gen mcp:server --list-tools
+
 # サーバーをテストモードで起動
-echo '{"jsonrpc":"2.0","method":"initialize","params":{},"id":1}' | php mcp-phpgen-server.php
+echo '{"jsonrpc":"2.0","method":"initialize","params":{},"id":1}' | ./bin/php-gen mcp:server
 
 # 利用可能なツールを確認
-echo '{"jsonrpc":"2.0","method":"tools/list","params":{},"id":2}' | php mcp-phpgen-server.php
+echo '{"jsonrpc":"2.0","method":"tools/list","params":{},"id":2}' | ./bin/php-gen mcp:server
 ```
 
 ## トラブルシューティング

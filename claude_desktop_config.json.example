@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "phpgen": {
-      "command": "php",
-      "args": ["/absolute/path/to/your/project/mcp-phpgen-server.php"]
-    }
-  }
-}

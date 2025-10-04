@@ -36,6 +36,11 @@ final class CommandDiscovery
                 continue;
             }
 
+            // Skip MCP server command itself
+            if ($commandClass === \PhpGen\ClassGenerator\Console\Commands\McpServerCommand::class) {
+                continue;
+            }
+
             $command = new $commandClass($config);
 
             if (!$command instanceof Command) {

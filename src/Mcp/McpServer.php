@@ -54,7 +54,7 @@ final class McpServer
         }
 
         $discovery = new CommandDiscovery();
-        $toolFactory = new McpToolFactory($config, $discovery);
+        $toolFactory = new McpToolFactory($discovery);
 
         return new self($config, $discovery, $toolFactory);
     }
