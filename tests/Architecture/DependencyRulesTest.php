@@ -78,6 +78,7 @@ final class DependencyRulesTest
                 Selector::inNamespace('PhpGen\ClassGenerator\Core'),
                 Selector::inNamespace('PhpGen\ClassGenerator\Config'),
                 Selector::inNamespace('PhpGen\ClassGenerator\Builder'),
+                Selector::inNamespace('PhpGen\ClassGenerator\Mcp'),
                 Selector::inNamespace('Symfony'),
                 Selector::inNamespace('Nette'),
                 // PHP standard library

@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'class:create',
-    description: 'Create a simple DTO class with readonly properties'
+    description: 'Create a simple class'
 )]
 class CreateClassCommand extends Command
 {
@@ -27,7 +27,8 @@ class CreateClassCommand extends Command
     {
         $project = new Project();
 
-        $className = $input->getArgument('fully-qualified-name');;
+        $classNameArg = $input->getArgument('fully-qualified-name');
+        $className = is_string($classNameArg) ? $classNameArg : '';
         $project->add(BluePrint::createEmptyClass($className));
 
         return $project;

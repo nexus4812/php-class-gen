@@ -35,10 +35,13 @@ final class McpToolFactory
         $metadata = $this->discovery->extractCommandMetadata($command);
         $schema = $this->discovery->generateMcpSchema($metadata);
 
+        /** @var array<string, mixed> $inputSchema */
+        $inputSchema = is_array($schema['inputSchema']) ? $schema['inputSchema'] : [];
+
         return new McpTool(
-            name: $schema['name'],
-            description: $schema['description'],
-            inputSchema: $schema['inputSchema'],
+            name: is_string($schema['name']) ? $schema['name'] : '',
+            description: is_string($schema['description']) ? $schema['description'] : '',
+            inputSchema: $inputSchema,
             executor: function (array $parameters) use ($command, $metadata): McpToolResult {
                 return $this->executeCommand($command, $metadata, $parameters);
             }
@@ -59,7 +62,7 @@ final class McpToolFactory
             // Validate parameters
             $validationResult = $this->validateParameters($metadata, $parameters);
             if (!$validationResult->isValid) {
-                return McpToolResult::error($validationResult->errorMessage);
+                return McpToolResult::error($validationResult->errorMessage ?? 'Validation failed');
             }
 
             // Convert parameters to Symfony Console input format
@@ -76,13 +79,6 @@ final class McpToolFactory
                 return McpToolResult::error("Command execution failed with exit code: {$exitCode}");
             }
 
-            // Get the generated project (if available)
-            $project = null;
-            if (method_exists($command, 'handle') && $command instanceof \PhpGen\ClassGenerator\Console\Commands\Command) {
-                // For now, we'll handle project extraction in a different way
-                // since commands don't have a direct getLastProject method
-            }
-
             $result = [
                 'command' => $metadata->name,
                 'parameters' => $parameters,
@@ -90,11 +86,6 @@ final class McpToolFactory
                 'exitCode' => $exitCode,
                 'dryRun' => $isDryRun
             ];
-
-            // Add file information if project is available
-            if ($project instanceof Project) {
-                $result['generatedFiles'] = $this->extractFileInformation($project);
-            }
 
             return McpToolResult::success($result);
 
@@ -218,28 +209,6 @@ final class McpToolFactory
         }
 
         return null;
-    }
-
-    /**
-     * Extract file information from project
-     *
-     * @param Project $project Generated project
-     * @return array<array<string, mixed>> File information
-     */
-    private function extractFileInformation(Project $project): array
-    {
-        $files = [];
-
-        foreach ($project->getBlueprints() as $blueprint) {
-            $files[] = [
-                'path' => $blueprint->getFilePath(),
-                'namespace' => $blueprint->getNamespace(),
-                'className' => $blueprint->getClassName(),
-                'type' => $blueprint->getType()
-            ];
-        }
-
-        return $files;
     }
 
     /**

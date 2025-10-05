@@ -59,11 +59,12 @@ final readonly class McpToolResult
             ];
         }
 
+        $errorMessage = is_string($this->data) ? $this->data : json_encode($this->data);
         return [
             'content' => [
                 [
                     'type' => 'text',
-                    'text' => "Error: {$this->data}"
+                    'text' => "Error: {$errorMessage}"
                 ]
             ],
             'isError' => true

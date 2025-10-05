@@ -128,7 +128,7 @@ class McpServerCommand extends Command
         $response = $server->processRequest('{"jsonrpc":"2.0","method":"tools/list","params":{},"id":1}');
         $data = json_decode($response, true);
 
-        if (!isset($data['result']['tools']) || !is_array($data['result']['tools'])) {
+        if (!is_array($data) || !isset($data['result']) || !is_array($data['result']) || !isset($data['result']['tools']) || !is_array($data['result']['tools'])) {
             $io->warning('No tools available or unable to retrieve tools list.');
             return;
         }
@@ -144,17 +144,32 @@ class McpServerCommand extends Command
         $io->success(sprintf('Found %d MCP tool(s):', count($tools)));
 
         foreach ($tools as $tool) {
-            $io->section($tool['name']);
-            $io->writeln("<info>Description:</info> {$tool['description']}");
+            if (!is_array($tool) || !isset($tool['name']) || !is_string($tool['name'])) {
+                continue;
+            }
 
-            if (isset($tool['inputSchema']['properties'])) {
+            $io->section($tool['name']);
+
+            $description = $tool['description'] ?? 'No description';
+            if (is_string($description)) {
+                $io->writeln("<info>Description:</info> {$description}");
+            }
+
+            if (isset($tool['inputSchema']) && is_array($tool['inputSchema']) && isset($tool['inputSchema']['properties']) && is_array($tool['inputSchema']['properties'])) {
                 $io->writeln('<info>Parameters:</info>');
 
-                $required = $tool['inputSchema']['required'] ?? [];
+                $required = [];
+                if (isset($tool['inputSchema']['required']) && is_array($tool['inputSchema']['required'])) {
+                    $required = $tool['inputSchema']['required'];
+                }
 
                 foreach ($tool['inputSchema']['properties'] as $param => $schema) {
-                    $type = $schema['type'] ?? 'unknown';
-                    $desc = $schema['description'] ?? 'No description';
+                    if (!is_string($param) || !is_array($schema)) {
+                        continue;
+                    }
+
+                    $type = is_string($schema['type'] ?? null) ? $schema['type'] : 'unknown';
+                    $desc = is_string($schema['description'] ?? null) ? $schema['description'] : 'No description';
                     $isRequired = in_array($param, $required, true) ? ' (required)' : ' (optional)';
 
                     $io->writeln("  • <comment>{$param}</comment> ({$type}){$isRequired}: {$desc}");

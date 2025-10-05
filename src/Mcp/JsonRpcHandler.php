@@ -31,6 +31,12 @@ final class JsonRpcHandler
             $params = $request['params'] ?? [];
             $id = $request['id'] ?? null;
 
+            // Ensure params is an array with string keys
+            if (!is_array($params)) {
+                $params = [];
+            }
+            /** @var array<string, mixed> $params */
+
             // Handle different MCP methods
             $response = match ($method) {
                 'initialize' => $this->handleInitialize($params),

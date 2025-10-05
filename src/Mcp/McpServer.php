@@ -18,14 +18,11 @@ final class McpServer
     /** @var array<string, McpTool> */
     private array $tools = [];
 
-    private readonly JsonRpcHandler $jsonRpcHandler;
-
     public function __construct(
         private readonly PhpGenConfig $config,
         private readonly CommandDiscovery $discovery,
         private readonly McpToolFactory $toolFactory
     ) {
-        $this->jsonRpcHandler = new JsonRpcHandler();
         $this->initializeTools();
     }
 
@@ -108,6 +105,10 @@ final class McpServer
             $method = $request['method'];
             $params = $request['params'] ?? [];
             $id = $request['id'] ?? null;
+
+            // Ensure params is an array with string keys
+            /** @var array<string, mixed> $params */
+            $params = is_array($params) ? $params : [];
 
             $response = match ($method) {
                 'initialize' => $this->handleInitialize($params),
@@ -198,6 +199,11 @@ final class McpServer
         if (!is_string($toolName)) {
             return $this->createErrorResponse(null, -32602, 'Invalid tool name');
         }
+
+        if (!is_array($arguments)) {
+            $arguments = [];
+        }
+        /** @var array<string, mixed> $arguments */
 
         if (!isset($this->tools[$toolName])) {
             return $this->createErrorResponse(null, -32602, "Tool '{$toolName}' not found");
