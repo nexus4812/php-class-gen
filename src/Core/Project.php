@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace PhpGen\ClassGenerator\Core;
 
 use PhpGen\ClassGenerator\Config\PhpGenConfig;
-use PhpGen\ClassGenerator\Builder\BluePrint;
-use PhpGen\ClassGenerator\Builder\BuilderInterface;
+use PhpGen\ClassGenerator\Blueprint\FileBlueprint;
+use PhpGen\ClassGenerator\Blueprint\BlueprintInterface;
 use RuntimeException;
 use Throwable;
 
@@ -22,7 +22,7 @@ class Project
     {
     }
 
-    private function addBuilder(BluePrint $builder): void
+    private function addBuilder(FileBlueprint $builder): void
     {
         $fullyQualifiedName = $builder->getFullyQualifiedName();
 
@@ -38,7 +38,7 @@ class Project
         $this->factories[$uniqueKey] = fn () => $builder;
     }
 
-    public function add(BluePrint $builder): self
+    public function add(FileBlueprint $builder): self
     {
         $this->addBuilder($builder);
         return $this;
@@ -68,9 +68,9 @@ class Project
      * Create a builder using the factory function
      *
      * @param string $type The file type identifier
-     * @return BuilderInterface|null The created builder or null if creation failed
+     * @return BlueprintInterface|null The created builder or null if creation failed
      */
-    private function createBuilder(string $type): ?BuilderInterface
+    private function createBuilder(string $type): ?BlueprintInterface
     {
         if (!isset($this->factories[$type])) {
             return null;
@@ -85,9 +85,9 @@ class Project
                 return null;
             }
 
-            if (!$result instanceof BuilderInterface) {
+            if (!$result instanceof BlueprintInterface) {
                 throw new RuntimeException(
-                    "Factory for file type '{$type}' must return a BuilderInterface instance, got " .
+                    "Factory for file type '{$type}' must return a BlueprintInterface instance, got " .
                     (is_object($result) ? $result::class : gettype($result))
                 );
             }

@@ -3,7 +3,7 @@ composer.phar
 /vendor/
 /generated/
 .php-cs-fixer.cache
-.phpunit.result.cach
+.phpunit.result.cache
 
 # lDE
 .idea

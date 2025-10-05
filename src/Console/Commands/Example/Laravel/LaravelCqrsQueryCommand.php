@@ -8,7 +8,7 @@ use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\InterfaceType;
 use Nette\PhpGenerator\Literal;
 use Nette\PhpGenerator\Property;
-use PhpGen\ClassGenerator\Builder\BluePrint;
+use PhpGen\ClassGenerator\Blueprint\FileBlueprint;
 use PhpGen\ClassGenerator\Console\Commands\Command;
 use PhpGen\ClassGenerator\Core\Project;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -112,9 +112,9 @@ class LaravelCqrsQueryCommand extends Command
     /**
      * Create the query handler interface
      */
-    private function createQueryInterface(InputInterface $input): BluePrint
+    private function createQueryInterface(InputInterface $input): FileBlueprint
     {
-        return BluePrint::createInterface(self::getInterfaceName($input), function (InterfaceType $interface) use ($input): InterfaceType {
+        return FileBlueprint::createInterface(self::getInterfaceName($input), function (InterfaceType $interface) use ($input): InterfaceType {
             $queryName = self::getQueryNameFromInput($input);
             $interface->addAttribute('Illuminate\\Container\\Attributes\\Bind', [
                 new Literal("{$queryName}QueryHandlerImplementation::class"),
@@ -140,9 +140,9 @@ class LaravelCqrsQueryCommand extends Command
     /**
      * Create the query handler implementation
      */
-    private function createQueryImplementation(InputInterface $input): BluePrint
+    private function createQueryImplementation(InputInterface $input): FileBlueprint
     {
-        return BluePrint::createEmptyClass(self::getImplementationName($input))
+        return FileBlueprint::createEmptyClass(self::getImplementationName($input))
             ->defineStructure(function (ClassType $class) use ($input) {
                 $class
                     ->setFinal()
@@ -196,9 +196,9 @@ PHP);
     /**
      * Create the query class
      */
-    private function createQuery(InputInterface $input): BluePrint
+    private function createQuery(InputInterface $input): FileBlueprint
     {
-        return BluePrint::createClass(self::getQueryName($input), function (ClassType $class): ClassType {
+        return FileBlueprint::createClass(self::getQueryName($input), function (ClassType $class): ClassType {
             $class
                 ->setFinal()
                 ->setReadOnly()
@@ -218,9 +218,9 @@ PHP);
     /**
      * Create the result class
      */
-    private function createResult(InputInterface $input): BluePrint
+    private function createResult(InputInterface $input): FileBlueprint
     {
-        return BluePrint::createClass(self::getResultName($input), static function (ClassType $class): ClassType {
+        return FileBlueprint::createClass(self::getResultName($input), static function (ClassType $class): ClassType {
             $class
                 ->setFinal()
                 ->setReadOnly();
@@ -240,9 +240,9 @@ PHP);
     /**
      * Create the feature test
      */
-    private function createQueryTest(InputInterface $input): BluePrint
+    private function createQueryTest(InputInterface $input): FileBlueprint
     {
-        return BluePrint::createEmptyClass(self::getImplementationTestName($input))
+        return FileBlueprint::createEmptyClass(self::getImplementationTestName($input))
             ->defineStructure(function (ClassType $class) use ($input) {
                 $class->setExtends('Tests\\TestCase');
                 $class->addTrait('Illuminate\\Foundation\\Testing\\RefreshDatabase');

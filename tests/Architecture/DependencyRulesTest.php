@@ -11,7 +11,7 @@ use PHPat\Test\PHPat;
 final class DependencyRulesTest
 {
     /**
-     * Core layer can only depend on Config and Builder layers
+     * Core layer can only depend on Config, Blueprint, and Generation layers
      */
     public function test_core_layer_dependencies(): Rule
     {
@@ -21,30 +21,46 @@ final class DependencyRulesTest
             ->classes(
                 Selector::inNamespace('PhpGen\ClassGenerator\Core'),
                 Selector::inNamespace('PhpGen\ClassGenerator\Config'),
-                Selector::inNamespace('PhpGen\ClassGenerator\Builder'),
-                // PHP standard library
-                Selector::inNamespace('')
+                Selector::inNamespace('PhpGen\ClassGenerator\Blueprint'),
+                Selector::inNamespace('PhpGen\ClassGenerator\Generation')
             )
-            ->because('Core layer should only depend on Config and Builder layers');
+            ->because('Core layer should only depend on Config, Blueprint, and Generation layers');
     }
 
     /**
-     * Builder layer can depend on Nette, Config, and Core layers
+     * Blueprint layer can depend on Nette, Config, Core, and Generation layers
      */
-    public function test_builder_layer_dependencies(): Rule
+    public function test_blueprint_layer_dependencies(): Rule
     {
         return PHPat::rule()
-            ->classes(Selector::inNamespace('PhpGen\ClassGenerator\Builder'))
+            ->classes(Selector::inNamespace('PhpGen\ClassGenerator\Blueprint'))
             ->canOnlyDependOn()
             ->classes(
-                Selector::inNamespace('PhpGen\ClassGenerator\Builder'),
+                Selector::inNamespace('PhpGen\ClassGenerator\Blueprint'),
                 Selector::inNamespace('PhpGen\ClassGenerator\Config'),
                 Selector::inNamespace('PhpGen\ClassGenerator\Core'),
-                Selector::inNamespace('Nette'),
-                // PHP standard library
-                Selector::inNamespace('')
+                Selector::inNamespace('PhpGen\ClassGenerator\Generation'),
+                Selector::inNamespace('Nette')
             )
-            ->because('Builder layer can depend on Nette, Config, and Core layers');
+            ->because('Blueprint layer can depend on Nette, Config, Core, and Generation layers');
+    }
+
+    /**
+     * Generation layer can depend on Nette, Config, Core, and Blueprint layers
+     */
+    public function test_generation_layer_dependencies(): Rule
+    {
+        return PHPat::rule()
+            ->classes(Selector::inNamespace('PhpGen\ClassGenerator\Generation'))
+            ->canOnlyDependOn()
+            ->classes(
+                Selector::inNamespace('PhpGen\ClassGenerator\Generation'),
+                Selector::inNamespace('PhpGen\ClassGenerator\Config'),
+                Selector::inNamespace('PhpGen\ClassGenerator\Core'),
+                Selector::inNamespace('PhpGen\ClassGenerator\Blueprint'),
+                Selector::inNamespace('Nette')
+            )
+            ->because('Generation layer can depend on Nette, Config, Core, and Blueprint layers');
     }
 
     /**
@@ -58,9 +74,7 @@ final class DependencyRulesTest
             ->classes(
                 Selector::inNamespace('PhpGen\ClassGenerator\Config'),
                 Selector::inNamespace('PhpGen\ClassGenerator\Console'),
-                Selector::inNamespace('Symfony'),
-                // PHP standard library
-                Selector::inNamespace('')
+                Selector::inNamespace('Symfony')
             )
             ->because('Config layer can depend on Console and Symfony layers');
     }
@@ -77,26 +91,37 @@ final class DependencyRulesTest
                 Selector::inNamespace('PhpGen\ClassGenerator\Console'),
                 Selector::inNamespace('PhpGen\ClassGenerator\Core'),
                 Selector::inNamespace('PhpGen\ClassGenerator\Config'),
-                Selector::inNamespace('PhpGen\ClassGenerator\Builder'),
+                Selector::inNamespace('PhpGen\ClassGenerator\Blueprint'),
+                Selector::inNamespace('PhpGen\ClassGenerator\Generation'),
                 Selector::inNamespace('PhpGen\ClassGenerator\Mcp'),
                 Selector::inNamespace('Symfony'),
-                Selector::inNamespace('Nette'),
-                // PHP standard library
-                Selector::inNamespace('')
+                Selector::inNamespace('Nette')
             )
             ->because('Console layer is the UI layer and can depend on everything');
     }
 
     /**
-     * Builder layer should not depend on Symfony
+     * Blueprint layer should not depend on Symfony
      */
-    public function test_builder_should_not_depend_on_symfony(): Rule
+    public function test_blueprint_should_not_depend_on_symfony(): Rule
     {
         return PHPat::rule()
-            ->classes(Selector::inNamespace('PhpGen\ClassGenerator\Builder'))
+            ->classes(Selector::inNamespace('PhpGen\ClassGenerator\Blueprint'))
             ->shouldNotDependOn()
             ->classes(Selector::inNamespace('Symfony'))
-            ->because('Builder layer should not depend on Symfony');
+            ->because('Blueprint layer should not depend on Symfony');
+    }
+
+    /**
+     * Generation layer should not depend on Symfony
+     */
+    public function test_generation_should_not_depend_on_symfony(): Rule
+    {
+        return PHPat::rule()
+            ->classes(Selector::inNamespace('PhpGen\ClassGenerator\Generation'))
+            ->shouldNotDependOn()
+            ->classes(Selector::inNamespace('Symfony'))
+            ->because('Generation layer should not depend on Symfony');
     }
 
     /**

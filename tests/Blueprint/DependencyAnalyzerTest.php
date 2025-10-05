@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Tests\Builder;
+namespace Tests\Blueprint;
 
 use PHPUnit\Framework\TestCase;
-use PhpGen\ClassGenerator\Builder\DependencyExtractor;
+use PhpGen\ClassGenerator\Blueprint\DependencyAnalyzer;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\InterfaceType;
 use Nette\PhpGenerator\TraitType;
 use Nette\PhpGenerator\Method;
 
-final class DependencyExtractorTest extends TestCase
+final class DependencyAnalyzerTest extends TestCase
 {
-    private DependencyExtractor $extractor;
+    private DependencyAnalyzer $extractor;
 
     protected function setUp(): void
     {
-        $this->extractor = new DependencyExtractor();
+        $this->extractor = new DependencyAnalyzer();
     }
 
     public function testExtractDependenciesFromEmptyClass(): void

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhpGen\ClassGenerator\Builder;
+namespace PhpGen\ClassGenerator\Blueprint;
 
 use Nette\PhpGenerator\EnumType;
 use Nette\PhpGenerator\InterfaceType;
@@ -11,34 +11,35 @@ use Nette\PhpGenerator\TraitType;
 use Nette\PhpGenerator\PhpFile;
 use Nette\PhpGenerator\ClassLike;
 use InvalidArgumentException;
+use PhpGen\ClassGenerator\Generation\FileComposer;
 
 /**
  * Universal builder for creating PHP code elements (classes, interfaces, traits)
  *
  * This class provides a fluent interface for building PHP code elements
  * with use statements and configuration callbacks. It acts as a facade
- * over ElementSpec and FileAssembler classes.
+ * over ElementBlueprint and FileComposer classes.
  */
-final class BluePrint implements BuilderInterface
+final class FileBlueprint implements BlueprintInterface
 {
-    private ElementSpec $spec;
+    private ElementBlueprint $spec;
     private bool $autoGenerateUses = true;
-    private DependencyExtractor $dependencyExtractor;
+    private DependencyAnalyzer $dependencyAnalyzer;
 
     /**
      * @param string $fullyQualifiedName
      * @param string $netteTypeClass
-     * @param DependencyExtractor|null $dependencyExtractor
+     * @param DependencyAnalyzer|null $dependencyAnalyzer
      */
-    public function __construct(string $fullyQualifiedName, string $netteTypeClass, ?DependencyExtractor $dependencyExtractor = null)
+    public function __construct(string $fullyQualifiedName, string $netteTypeClass, ?DependencyAnalyzer $dependencyAnalyzer = null)
     {
-        $this->spec = new ElementSpec($fullyQualifiedName, $netteTypeClass);
-        $this->dependencyExtractor = $dependencyExtractor ?? new DependencyExtractor();
+        $this->spec = new ElementBlueprint($fullyQualifiedName, $netteTypeClass);
+        $this->dependencyAnalyzer = $dependencyAnalyzer ?? new DependencyAnalyzer();
     }
 
     public static function createEmptyClass(string $fullyQualifiedName): self
     {
-        return new BluePrint($fullyQualifiedName, ClassType::class);
+        return new FileBlueprint($fullyQualifiedName, ClassType::class);
     }
 
     /**
@@ -56,7 +57,7 @@ final class BluePrint implements BuilderInterface
 
     public static function createEmptyInterface(string $fullyQualifiedName): self
     {
-        return new BluePrint($fullyQualifiedName, InterfaceType::class);
+        return new FileBlueprint($fullyQualifiedName, InterfaceType::class);
     }
 
     /**
@@ -74,7 +75,7 @@ final class BluePrint implements BuilderInterface
 
     public static function createEnum(string $fullyQualifiedName): self
     {
-        return new BluePrint($fullyQualifiedName, EnumType::class);
+        return new FileBlueprint($fullyQualifiedName, EnumType::class);
     }
 
 
@@ -126,7 +127,7 @@ final class BluePrint implements BuilderInterface
 
             // Extract dependencies and add use statements
             if ($result instanceof ClassLike) {
-                $dependencies = $this->dependencyExtractor->extractDependencies($result);
+                $dependencies = $this->dependencyAnalyzer->extractDependencies($result);
                 $this->addUsesForClasses($dependencies);
             }
         }
@@ -154,9 +155,9 @@ final class BluePrint implements BuilderInterface
     /**
      * Build and return the complete PHP file
      *
-     * @param FileAssembler $assembler The file assembler to use for building
+     * @param FileComposer $assembler The file composer to use for building
      */
-    public function build(FileAssembler $assembler): PhpFile
+    public function build(FileComposer $assembler): PhpFile
     {
         return $assembler->assemble($this->spec);
     }

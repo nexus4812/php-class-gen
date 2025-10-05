@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace PhpGen\ClassGenerator\Builder;
+namespace PhpGen\ClassGenerator\Generation;
 
 use Nette\PhpGenerator\PhpFile;
 use Nette\PhpGenerator\PsrPrinter;
 use PhpGen\ClassGenerator\Core\PathResolver;
 
-final class CodeGenerator
+final class CodeWriter
 {
     private PsrPrinter $printer;
     private PathResolver $pathResolver;

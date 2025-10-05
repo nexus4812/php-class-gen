@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace PhpGen\ClassGenerator\Console\Commands;
 
 use Nette\PhpGenerator\ClassType;
-use PhpGen\ClassGenerator\Builder\BluePrint;
+use PhpGen\ClassGenerator\Blueprint\FileBlueprint;
 use PhpGen\ClassGenerator\Core\Project;
 use PhpGen\ClassGenerator\Core\PropertyTypeParser;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -52,11 +52,11 @@ class CreateDtoCommand extends Command
         return $project;
     }
 
-    private function createDto(string $name, string $propertiesString): BluePrint
+    private function createDto(string $name, string $propertiesString): FileBlueprint
     {
         $properties = PropertyTypeParser::parse($propertiesString);
 
-        return BluePrint::createClass($name, static function (ClassType $class) use ($properties): ClassType {
+        return FileBlueprint::createClass($name, static function (ClassType $class) use ($properties): ClassType {
             $class->setFinal()->setReadOnly();
 
             // Add constructor with promoted parameters

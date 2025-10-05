@@ -8,7 +8,7 @@ use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\InterfaceType;
 use Nette\PhpGenerator\Literal;
 use Nette\PhpGenerator\Property;
-use PhpGen\ClassGenerator\Builder\BluePrint;
+use PhpGen\ClassGenerator\Blueprint\FileBlueprint;
 use PhpGen\ClassGenerator\Console\Commands\Command;
 use PhpGen\ClassGenerator\Core\Project;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -112,9 +112,9 @@ class LaravelCqrsCommandCommand extends Command
     /**
      * Create the command handler interface
      */
-    private function createCommandInterface(InputInterface $input): BluePrint
+    private function createCommandInterface(InputInterface $input): FileBlueprint
     {
-        return BluePrint::createInterface(self::getInterfaceName($input), function (InterfaceType $interface) use ($input): InterfaceType {
+        return FileBlueprint::createInterface(self::getInterfaceName($input), function (InterfaceType $interface) use ($input): InterfaceType {
             $commandName = self::getCommandNameFromInput($input);
             $interface->addAttribute('Illuminate\\Container\\Attributes\\Bind', [
                 new Literal("{$commandName}CommandHandlerImplementation::class"),
@@ -143,9 +143,9 @@ class LaravelCqrsCommandCommand extends Command
     /**
      * Create the command handler implementation
      */
-    private function createCommandImplementation(InputInterface $input): BluePrint
+    private function createCommandImplementation(InputInterface $input): FileBlueprint
     {
-        return BluePrint::createEmptyClass(self::getImplementationName($input))
+        return FileBlueprint::createEmptyClass(self::getImplementationName($input))
             ->defineStructure(function (ClassType $class) use ($input) {
                 $class
                     ->setFinal()
@@ -213,9 +213,9 @@ PHP);
     /**
      * Create the command class
      */
-    private function createCommand(InputInterface $input): BluePrint
+    private function createCommand(InputInterface $input): FileBlueprint
     {
-        return BluePrint::createClass(self::getCommandName($input), function (ClassType $class): ClassType {
+        return FileBlueprint::createClass(self::getCommandName($input), function (ClassType $class): ClassType {
             $class
                 ->setFinal()
                 ->setReadOnly()
@@ -235,9 +235,9 @@ PHP);
     /**
      * Create the feature test
      */
-    private function createCommandTest(InputInterface $input): BluePrint
+    private function createCommandTest(InputInterface $input): FileBlueprint
     {
-        return BluePrint::createEmptyClass(self::getImplementationTestName($input))
+        return FileBlueprint::createEmptyClass(self::getImplementationTestName($input))
             ->defineStructure(function (ClassType $class) use ($input) {
                 $class->setExtends('Tests\\TestCase');
                 $class->addTrait('Illuminate\\Foundation\\Testing\\RefreshDatabase');

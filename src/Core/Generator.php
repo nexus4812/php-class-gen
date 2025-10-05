@@ -6,9 +6,9 @@ namespace PhpGen\ClassGenerator\Core;
 
 use Nette\PhpGenerator\PhpFile;
 use PhpGen\ClassGenerator\Config\PhpGenConfig;
-use PhpGen\ClassGenerator\Builder\BuilderInterface;
-use PhpGen\ClassGenerator\Builder\CodeGenerator;
-use PhpGen\ClassGenerator\Builder\FileAssembler;
+use PhpGen\ClassGenerator\Blueprint\BlueprintInterface;
+use PhpGen\ClassGenerator\Generation\CodeWriter;
+use PhpGen\ClassGenerator\Generation\FileComposer;
 
 /**
  * Main generator class for creating PHP code elements
@@ -39,14 +39,14 @@ final class Generator
 
     /**
      * Unified collection of all builders for streamlined processing
-     * @var array<string, BuilderInterface>
+     * @var array<string, BlueprintInterface>
      */
     private array $builders = [];
 
     /**
-     * File assembler for building PHP files from specs
+     * File composer for building PHP files from specs
      */
-    private FileAssembler $assembler;
+    private FileComposer $assembler;
 
     /**
      * Configuration instance
@@ -56,7 +56,7 @@ final class Generator
     public function __construct(?PhpGenConfig $config = null)
     {
         $this->config = $config ?? new PhpGenConfig();
-        $this->assembler = new FileAssembler($this->config);
+        $this->assembler = new FileComposer($this->config);
     }
 
     /**
@@ -75,10 +75,10 @@ final class Generator
      * This method allows adding builders that have been created and configured
      * outside of the generator, providing more flexibility in builder creation.
      *
-     * @param BuilderInterface $builder The configured builder to add
+     * @param BlueprintInterface $builder The configured builder to add
      * @return self Returns the generator instance for method chaining
      */
-    public function addBuilder(BuilderInterface $builder): self
+    public function addBuilder(BlueprintInterface $builder): self
     {
         $this->builders[$builder->getFullyQualifiedName()] = $builder;
         return $this;
@@ -103,7 +103,7 @@ final class Generator
      */
     public function generate(bool $dryRun = false): void
     {
-        $generator = new CodeGenerator(new PathResolver($this->config));
+        $generator = new CodeWriter(new PathResolver($this->config));
 
         // Generate files created via file() method
         foreach ($this->files as $namespace => $file) {
@@ -135,7 +135,7 @@ final class Generator
      */
     public function previewGeneration(): array
     {
-        $generator = new CodeGenerator(new PathResolver($this->config));
+        $generator = new CodeWriter(new PathResolver($this->config));
         $preview = [];
 
         // Preview files created via file() method

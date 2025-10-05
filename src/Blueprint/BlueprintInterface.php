@@ -2,22 +2,23 @@
 
 declare(strict_types=1);
 
-namespace PhpGen\ClassGenerator\Builder;
+namespace PhpGen\ClassGenerator\Blueprint;
 
 use Nette\PhpGenerator\PhpFile;
+use PhpGen\ClassGenerator\Generation\FileComposer;
 
 /**
- * Interface for all code element builders
+ * Interface for all code element blueprints
  */
-interface BuilderInterface
+interface BlueprintInterface
 {
     /**
      * Build and return the complete PHP file
      *
-     * @param FileAssembler $assembler The file assembler to use for building
+     * @param FileComposer $assembler The file composer to use for building
      * @return PhpFile The generated PHP file
      */
-    public function build(FileAssembler $assembler): PhpFile;
+    public function build(FileComposer $assembler): PhpFile;
 
     /**
      * Get the fully qualified name of the element being built

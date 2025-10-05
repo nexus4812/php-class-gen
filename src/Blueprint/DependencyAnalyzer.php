@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhpGen\ClassGenerator\Builder;
+namespace PhpGen\ClassGenerator\Blueprint;
 
 use Nette\PhpGenerator\ClassLike;
 use Nette\PhpGenerator\ClassType;
@@ -23,7 +23,7 @@ use Nette\PhpGenerator\Property;
  * - Property types
  * - Attributes
  */
-final class DependencyExtractor
+final class DependencyAnalyzer
 {
     /**
      * Extract all dependencies from a ClassLike object
