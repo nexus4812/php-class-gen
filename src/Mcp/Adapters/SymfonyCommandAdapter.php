@@ -2,22 +2,24 @@
 
 declare(strict_types=1);
 
-namespace PhpGen\ClassGenerator\Mcp;
+namespace PhpGen\ClassGenerator\Mcp\Adapters;
 
-use PhpGen\ClassGenerator\Config\PhpGenConfig;
 use PhpGen\ClassGenerator\Console\Commands\Command;
-use PhpGen\ClassGenerator\Core\Project;
+use PhpGen\ClassGenerator\Mcp\CommandDiscovery;
+use PhpGen\ClassGenerator\Mcp\CommandMetadata;
+use PhpGen\ClassGenerator\Mcp\ValidationResult;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Throwable;
 
 /**
- * Factory for creating MCP tools from PhpGen commands
+ * Adapter to convert Symfony Console Commands to MCP tool handlers
  *
- * This class dynamically creates MCP tools that can execute PhpGen commands
- * with proper parameter mapping and validation.
+ * This adapter bridges the gap between PhpGen's existing Symfony Command infrastructure
+ * and the php-mcp/server library. It reuses the CommandDiscovery logic to maintain
+ * compatibility with the existing implementation.
  */
-final class McpToolFactory
+final class SymfonyCommandAdapter
 {
     public function __construct(
         private readonly CommandDiscovery $discovery
@@ -25,44 +27,78 @@ final class McpToolFactory
     }
 
     /**
-     * Create an MCP tool from a command
+     * Create a callable handler for php-mcp/server from a Symfony Command
      *
-     * @param Command $command The command to wrap
-     * @return McpTool MCP tool instance
+     * @param Command $command The Symfony command to adapt
+     * @return callable(array<string, mixed>): array<string, mixed> Handler function that executes the command
      */
-    public function createToolFromCommand(Command $command): McpTool
+    public function createToolHandler(Command $command): callable
+    {
+        $metadata = $this->discovery->extractCommandMetadata($command);
+
+        /**
+         * @param array<string, mixed> $parameters
+         * @return array<string, mixed>
+         */
+        return function (array $parameters) use ($command, $metadata): array {
+            /** @var array<string, mixed> $parameters */
+            return $this->executeCommand($command, $metadata, $parameters);
+        };
+    }
+
+    /**
+     * Generate MCP-compatible JSON schema for a Symfony Command
+     *
+     * @param Command $command The command to generate schema for
+     * @return array<string, mixed> JSON schema definition
+     */
+    public function generateSchema(Command $command): array
     {
         $metadata = $this->discovery->extractCommandMetadata($command);
         $schema = $this->discovery->generateMcpSchema($metadata);
 
-        /** @var array<string, mixed> $inputSchema */
-        $inputSchema = is_array($schema['inputSchema']) ? $schema['inputSchema'] : [];
+        // Return only the inputSchema part (php-mcp/server handles name/description separately)
+        $inputSchema = $schema['inputSchema'] ?? [];
 
-        return new McpTool(
-            name: is_string($schema['name']) ? $schema['name'] : '',
-            description: is_string($schema['description']) ? $schema['description'] : '',
-            inputSchema: $inputSchema,
-            executor: function (array $parameters) use ($command, $metadata): McpToolResult {
-                return $this->executeCommand($command, $metadata, $parameters);
-            }
-        );
+        /** @var array<string, mixed> */
+        return is_array($inputSchema) ? $inputSchema : [];
     }
 
     /**
-     * Execute a command with the given parameters
+     * Get the MCP tool name for a command
+     *
+     * @param Command $command The command
+     * @return string MCP tool name (e.g., "dto:create" -> "dto_create")
+     */
+    public function getToolName(Command $command): string
+    {
+        $commandName = $command->getName();
+        if ($commandName === null) {
+            return '';
+        }
+
+        // Replace colons with underscores for MCP compatibility
+        return str_replace(':', '_', $commandName);
+    }
+
+    /**
+     * Execute a Symfony command with the given parameters
      *
      * @param Command $command The command to execute
      * @param CommandMetadata $metadata Command metadata
-     * @param array<string, mixed> $parameters Input parameters
-     * @return McpToolResult Execution result
+     * @param array<string, mixed> $parameters Input parameters from MCP
+     * @return array<string, mixed> Execution result
+     * @throws \Exception If command execution fails
      */
-    private function executeCommand(Command $command, CommandMetadata $metadata, array $parameters): McpToolResult
+    private function executeCommand(Command $command, CommandMetadata $metadata, array $parameters): array
     {
         try {
             // Validate parameters
             $validationResult = $this->validateParameters($metadata, $parameters);
             if (!$validationResult->isValid) {
-                return McpToolResult::error($validationResult->errorMessage ?? 'Validation failed');
+                throw new \InvalidArgumentException(
+                    $validationResult->errorMessage ?? 'Validation failed'
+                );
             }
 
             // Convert parameters to Symfony Console input format
@@ -76,21 +112,26 @@ final class McpToolFactory
             $exitCode = $command->run($input, $output);
 
             if ($exitCode !== 0) {
-                return McpToolResult::error("Command execution failed with exit code: {$exitCode}");
+                throw new \RuntimeException(
+                    "Command execution failed with exit code: {$exitCode}\nOutput: " . $output->fetch()
+                );
             }
 
-            $result = [
+            return [
                 'command' => $metadata->name,
                 'parameters' => $parameters,
                 'output' => $output->fetch(),
                 'exitCode' => $exitCode,
-                'dryRun' => $isDryRun
+                'dryRun' => $isDryRun,
+                'success' => true,
             ];
 
-            return McpToolResult::success($result);
-
         } catch (Throwable $e) {
-            return McpToolResult::error("Command execution failed: " . $e->getMessage());
+            throw new \RuntimeException(
+                "Command execution failed: " . $e->getMessage(),
+                0,
+                $e
+            );
         }
     }
 
