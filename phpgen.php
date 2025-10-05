@@ -5,7 +5,7 @@ declare(strict_types=1);
 use PhpGen\ClassGenerator\Config\PhpGenConfig;
 use PhpGen\ClassGenerator\Console\Commands\CreateClassCommand;
 use PhpGen\ClassGenerator\Console\Commands\CreateDtoCommand;
-use PhpGen\ClassGenerator\Console\Commands\LaravelCqrsQueryCommand;
+use PhpGen\ClassGenerator\Console\Commands\Example\Laravel\LaravelCqrsQueryCommand;
 
 /**
  * PhpGen Configuration File

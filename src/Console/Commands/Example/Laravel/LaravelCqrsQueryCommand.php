@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace PhpGen\ClassGenerator\Console\Commands;
+namespace PhpGen\ClassGenerator\Console\Commands\Example\Laravel;
 
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\InterfaceType;
 use Nette\PhpGenerator\Literal;
 use Nette\PhpGenerator\Property;
 use PhpGen\ClassGenerator\Builder\BluePrint;
+use PhpGen\ClassGenerator\Console\Commands\Command;
 use PhpGen\ClassGenerator\Core\Project;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -126,9 +127,11 @@ class LaravelCqrsQueryCommand extends Command
                     ->setType(self::getQueryName($input));
             }
 
-            $interface->getMethod('handle')
+            $interface
+                ->getMethod('handle')
                 ->setReturnType(self::getResultName($input))
-                ->setComment('Execute the query and return the result');
+                ->setComment('Execute the query and return the result')
+            ;
 
             return $interface;
         });
@@ -144,24 +147,28 @@ class LaravelCqrsQueryCommand extends Command
                 $class
                     ->setFinal()
                     ->setReadOnly()
-                    ->addImplement(self::getInterfaceName($input));
+                    ->addImplement(self::getInterfaceName($input))
+                ;
 
-                // Add constructor for dependency injection
-                $constructor = $class->addMethod('__construct');
-                $constructor->setComment('Constructor for dependency injection');
-                $constructor->setBody('// TODO: Add dependencies as needed');
+                $class
+                    ->addMethod('__construct')
+                    ->addPromotedParameter("connection")
+                    ->setType('Illuminate\\Database\\ConnectionInterface')
+                    ->setPrivate()
+                ;
 
                 // Add handle method with typed parameters
                 $handle = $class->addMethod('handle');
+                $handle->setReturnType(self::getResultName($input));
+                $handle->setComment('@inheritdoc');
+                $handle->setBody(<<<PHP
+\$result = \$this->connection->table(''); '// TODO: create query logic'
+PHP);
 
                 if (!$input->getOption('no-query')) {
                     $handle->addParameter('query')
                         ->setType(self::getQueryName($input));
                 }
-
-                $handle->setReturnType(self::getResultName($input));
-                $handle->setComment('@inheritdoc');
-                $handle->setBody('// TODO: Implement query logic' . PHP_EOL);
 
                 return $class;
             });
@@ -175,15 +182,15 @@ class LaravelCqrsQueryCommand extends Command
         return BluePrint::createClass(self::getQueryName($input), function (ClassType $class): ClassType {
             $class
                 ->setFinal()
-                ->setReadOnly();
+                ->setReadOnly()
+            ;
 
-            // Add constructor with basic parameters
-            $constructor = $class->addMethod('__construct');
-            $constructor->setComment('Query constructor with parameters');
-            $constructor->setBody('// TODO: Add query parameters as needed');
-            $constructor->addPromotedParameter('id')
+            $class
+                ->addMethod('__construct')
+                ->setBody('// TODO: Add query parameters as needed')
+                ->addPromotedParameter('id')
                 ->setType('int')
-                ->setComment('Entity ID');
+            ;
 
             return $class;
         });
@@ -222,7 +229,7 @@ class LaravelCqrsQueryCommand extends Command
                 $class->addTrait('Illuminate\\Foundation\\Testing\\RefreshDatabase');
 
                 $class->setProperties([
-                    (new Property('queryHandler'))->setType(self::getImplementationName($input)),
+                    (new Property('queryHandler'))->setType(self::getImplementationName($input))->setPrivate(),
                 ]);
 
                 // Add setUp method

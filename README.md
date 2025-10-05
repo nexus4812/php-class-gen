@@ -16,7 +16,7 @@ A powerful and flexible PHP code generation library that allows you to create cu
 ```php
 <?php
 
-use PhpGen\ClassGenerator\Config\PhpGenConfig;use PhpGen\ClassGenerator\Console\Commands\LaravelCqrsQueryCommand;
+use PhpGen\ClassGenerator\Config\PhpGenConfig;use PhpGen\ClassGenerator\Console\Commands\Example\Laravel\LaravelCqrsQueryCommand;
 
 return PhpGenConfig::configure()
     ->withCommands([
@@ -64,7 +64,7 @@ Create `phpgen.php` in your project root:
 ```php
 <?php
 
-use PhpGen\ClassGenerator\Config\PhpGenConfig;use PhpGen\ClassGenerator\Console\Commands\LaravelCqrsQueryCommand;
+use PhpGen\ClassGenerator\Config\PhpGenConfig;use PhpGen\ClassGenerator\Console\Commands\Example\Laravel\LaravelCqrsQueryCommand;
 
 return PhpGenConfig::configure()
     ->withCommands([
@@ -217,7 +217,7 @@ Add to your `phpgen.php`:
 ```php
 return PhpGenConfig::configure()
     ->withCommands([
-        \PhpGen\ClassGenerator\Console\Commands\LaravelCqrsQueryCommand::class,
+        \PhpGen\ClassGenerator\Console\Commands\Example\Laravel\LaravelCqrsQueryCommand::class,
         \App\Commands\ModelGeneratorCommand::class,  // Your custom command
     ])
     ->withComposerAutoload()
