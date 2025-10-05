@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use PhpGen\ClassGenerator\Config\PhpGenConfig;
+use PhpGen\ClassGenerator\Console\Commands\CreateClassCommand;
 use PhpGen\ClassGenerator\Console\Commands\CreateDtoCommand;
 use PhpGen\ClassGenerator\Console\Commands\LaravelCqrsQueryCommand;
-use PhpGen\ClassGenerator\Console\Commands\McpServerCommand;
 
 /**
  * PhpGen Configuration File
@@ -17,7 +17,7 @@ return PhpGenConfig::configure()
     ->withCommands([
         LaravelCqrsQueryCommand::class,
         CreateDtoCommand::class,
-        McpServerCommand::class,  // Default: MCP server for Claude Code integration
+        CreateClassCommand::class,
     ])
     ->withComposerAutoload() // Automatically loads PSR-4 mappings from composer.json
     ->withPsr4Mapping('App\\', 'app') // Additional custom mapping (overrides composer.json if needed)

@@ -6,6 +6,7 @@ namespace PhpGen\ClassGenerator\Console;
 
 use PhpGen\ClassGenerator\Config\CommandRegistry;
 use PhpGen\ClassGenerator\Config\PhpGenConfig;
+use PhpGen\ClassGenerator\Console\Commands\McpServerCommand;
 use Symfony\Component\Console\Application as SymfonyApplication;
 use InvalidArgumentException;
 use Throwable;
@@ -62,6 +63,9 @@ final class Application extends SymfonyApplication
             // Register commands from configuration
             $registry = new CommandRegistry($config);
             $registry->registerWithApplication($this);
+
+            // Register MCP server command (doesn't need PhpGenConfig)
+            $this->add(new McpServerCommand());
 
         } catch (Throwable $e) {
             throw new InvalidArgumentException(

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace PhpGen\ClassGenerator\Mcp;
 
 use PhpGen\ClassGenerator\Config\PhpGenConfig;
-use PhpGen\ClassGenerator\Console\Commands\Command;
 use Throwable;
 
 /**
@@ -154,7 +153,7 @@ final class McpServer
             'result' => [
                 'protocolVersion' => '2024-11-05',
                 'capabilities' => [
-                    'tools' => []
+                    'tools' => (object)[]  // Empty object indicates tools capability is supported
                 ],
                 'serverInfo' => [
                     'name' => 'phpgen-mcp-server',

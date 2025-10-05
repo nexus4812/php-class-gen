@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace PhpGen\ClassGenerator\Console\Commands;
 
-use PhpGen\ClassGenerator\Config\PhpGenConfig;
-use PhpGen\ClassGenerator\Core\Project;
 use PhpGen\ClassGenerator\Mcp\McpServer;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -30,7 +29,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class McpServerCommand extends Command
 {
-    protected function configureCommand(): void
+    protected function configure(): void
     {
         $this
             ->addOption(
@@ -55,7 +54,7 @@ class McpServerCommand extends Command
             );
     }
 
-    protected function handle(InputInterface $input, OutputInterface $output): Project
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
@@ -72,23 +71,19 @@ class McpServerCommand extends Command
             // Check if user wants to list tools
             if ($input->getOption('list-tools')) {
                 $this->listAvailableTools($server, $io);
-                return new Project(); // Return empty project
+                return Command::SUCCESS;
             }
 
-            // Display startup information
-            $this->displayStartupInfo($io, $configPath);
+            // For MCP server mode, suppress all output to stdout
+            // since stdout is used for JSON-RPC communication
+            // Only show startup info to stderr
+            $this->displayStartupInfoToStderr($configPath);
 
             // Check port option (for future HTTP support)
             $port = $input->getOption('port');
             if ($port !== null) {
-                $io->warning('HTTP mode is not yet implemented. Starting in stdio mode.');
+                fwrite(STDERR, "Warning: HTTP mode is not yet implemented. Starting in stdio mode.\n");
             }
-
-            // Start the server in stdio mode
-            $io->info('Starting MCP server in stdio mode...');
-            $io->comment('The server will read JSON-RPC requests from stdin and write responses to stdout.');
-            $io->comment('Press Ctrl+C to stop the server.');
-            $io->newLine();
 
             // Start the server (this will block)
             $server->start();
@@ -104,27 +99,22 @@ class McpServerCommand extends Command
                 $io->writeln($e->getTraceAsString());
             }
 
-            throw $e;
+            return Command::FAILURE;
         }
 
         // This line should never be reached as the server blocks
-        return new Project();
+        return Command::SUCCESS;
     }
 
     /**
-     * Display startup information
+     * Display startup information to stderr (not stdout which is used for JSON-RPC)
      */
-    private function displayStartupInfo(SymfonyStyle $io, ?string $configPath): void
+    private function displayStartupInfoToStderr(?string $configPath): void
     {
-        $io->title('PhpGen MCP Server');
-
-        $info = [
-            ['Config File', $configPath ?? 'Auto-detected'],
-            ['Protocol', 'JSON-RPC 2.0 over stdio'],
-            ['Mode', 'MCP (Model Context Protocol)'],
-        ];
-
-        $io->table(['Setting', 'Value'], $info);
+        fwrite(STDERR, "PhpGen MCP Server starting...\n");
+        fwrite(STDERR, "Config: " . ($configPath ?? 'Auto-detected') . "\n");
+        fwrite(STDERR, "Protocol: JSON-RPC 2.0 over stdio\n");
+        fwrite(STDERR, "Ready to receive requests.\n\n");
     }
 
     /**
