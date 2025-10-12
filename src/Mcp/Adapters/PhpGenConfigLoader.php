@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpGen\ClassGenerator\Mcp\Adapters;
 
 use PhpGen\ClassGenerator\Config\PhpGenConfig;
+use InvalidArgumentException;
 
 /**
  * Loader for PhpGen configuration files
@@ -19,14 +20,14 @@ final class PhpGenConfigLoader
      *
      * @param string|null $configPath Path to the config file, or null to auto-detect
      * @return PhpGenConfig The loaded configuration
-     * @throws \InvalidArgumentException If config file not found or invalid
+     * @throws InvalidArgumentException If config file not found or invalid
      */
     public function load(?string $configPath = null): PhpGenConfig
     {
         $configFile = $configPath ?? $this->findPhpGenConfigFile();
 
         if ($configFile === null || !file_exists($configFile)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'PhpGen configuration file not found. Please create a phpgen.php file in your project root.'
             );
         }
@@ -34,7 +35,7 @@ final class PhpGenConfigLoader
         $config = require $configFile;
 
         if (!$config instanceof PhpGenConfig) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'Configuration file must return a PhpGenConfig instance.'
             );
         }

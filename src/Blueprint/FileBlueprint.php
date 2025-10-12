@@ -106,7 +106,7 @@ final class FileBlueprint
      */
     public function addUsesForClasses(array $classNames): self
     {
-        $filteredClasses = array_filter($classNames, fn($class) => !empty($class));
+        $filteredClasses = array_filter($classNames, fn ($class) => !empty($class));
         $uniqueClasses = array_unique($filteredClasses);
 
         foreach ($uniqueClasses as $className) {
