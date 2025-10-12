@@ -1,5 +1,5 @@
 {
-    "name": "php-gen/class-generator",
+    "name": "nexus4812/php-class-gen",
     "description": "PHP code generator for repositories, entities, and tests with DSL support",
     "type": "library",
     "keywords": ["php", "generator", "repository", "entity", "code-generation", "dsl"],

@@ -10,7 +10,7 @@ A powerful and flexible PHP code generation library.
 Create custom code generators easily with a command-based architecture.
 Perfect for generating boilerplate code, CQRS patterns, domain objects, and more.
 
-## ( Features
+## Features
 
 ### nette/php-generator Extensions
 
@@ -32,7 +32,7 @@ Integrates with Claude Code/Claude Desktop for AI-assisted code generation:
 - Execute code generation commands directly from prompts
 - Project-specific code generation available from AI assistants
 
-## =� Quick Start
+## Quick Start
 
 ### 1. Create Configuration File
 
@@ -107,7 +107,7 @@ vendor/bin/php-gen dto:create "App\\DTOs\\UserDto" --properties="id:int,name:str
 vendor/bin/php-gen query:generate User GetUserById --dry-run -v
 ```
 
-## =' Creating Custom Commands
+## Creating Custom Commands
 
 ### Basic Pattern
 
@@ -159,7 +159,7 @@ return PhpGenConfig::configure()
 
 See `src/Console/Commands/Example/Laravel/` for detailed implementation examples.
 
-## � Configuration
+## Configuration
 
 ### PSR-4 Mapping Management
 
@@ -190,7 +190,7 @@ PhpGenConfig::configure()
     ->withStrictTypes(bool)                  // Enable/disable strict types
 ```
 
-## = MCP Server Integration
+## MCP Server Integration
 
 PhpGen works as an MCP (Model Context Protocol) server and can be used directly from Claude Code or Claude Desktop.
 
@@ -253,7 +253,7 @@ Command � Project � FileBlueprint � Generator � CodeWriter
 
 See the `src/` directory for details.
 
-## = Troubleshooting
+## Troubleshooting
 
 ### Debug Mode
 
