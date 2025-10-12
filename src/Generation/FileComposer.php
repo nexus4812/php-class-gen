@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhpGen\ClassGenerator\Builder;
+namespace PhpGen\ClassGenerator\Generation;
 
 use InvalidArgumentException;
 use Nette\PhpGenerator\PhpFile;
@@ -11,15 +11,16 @@ use Nette\PhpGenerator\InterfaceType;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\TraitType;
 use PhpGen\ClassGenerator\Config\PhpGenConfig;
+use PhpGen\ClassGenerator\Blueprint\ElementBlueprint;
 use LogicException;
 
 /**
  * Assembles PHP files from element specifications
  *
  * This class is responsible for the actual construction of PhpFile instances
- * based on the configuration provided in ElementSpec objects.
+ * based on the configuration provided in ElementBlueprint objects.
  */
-final class FileAssembler
+final class FileComposer
 {
     public function __construct(
         private PhpGenConfig $config
@@ -29,7 +30,7 @@ final class FileAssembler
     /**
      * Assemble a PHP file from the given element specification
      */
-    public function assemble(ElementSpec $spec): PhpFile
+    public function assemble(ElementBlueprint $spec): PhpFile
     {
         $file = new PhpFile();
 
@@ -62,7 +63,7 @@ final class FileAssembler
      *
      * @return ClassType|InterfaceType|TraitType
      */
-    private function createElement(PhpNamespace $namespace, ElementSpec $spec)
+    private function createElement(PhpNamespace $namespace, ElementBlueprint $spec)
     {
         $className = $spec->getClassName();
         $netteTypeClass = $spec->getNetteTypeClass();

@@ -1,79 +1,68 @@
-
 **This project is currently in draft stage**
 
-Breaking changes may be made until official deployment
+Breaking changes may occur until the official release.
 
 # PHP Class Generator
 
-A powerful and flexible PHP code generation library that allows you to create custom code generators using a command-based architecture. Perfect for generating boilerplate code, CQRS patterns, domain objects, and more.
+[日本語](document/README_JA.md) | [English](README.md)
 
-## 🚀 Quick Start
+A powerful and flexible PHP code generation library.
+Create custom code generators easily with a command-based architecture.
+Perfect for generating boilerplate code, CQRS patterns, domain objects, and more.
 
-### Basic Usage
+## ( Features
 
-1. **Create a configuration file** (`phpgen.php` in your project root):
+### nette/php-generator Extensions
 
-```php
-<?php
+- Built on [nette/php-generator](https://github.com/nette/php-generator) with additional convenient features for basic code generation:
 
-use PhpGen\ClassGenerator\Config\PhpGenConfig;use PhpGen\ClassGenerator\Console\Commands\LaravelCqrsQueryCommand;
+- **Automatic Use Statement Generation**: Automatically adds import statements for used classes
+- **Auto Strict Types**: Automatically inserts `declare(strict_types=1);`
+- **PSR-4 Auto Mapping**: Reads composer.json configuration to automatically map namespaces to file paths
+- **Automatic Dependency Resolution**: Analyzes class dependencies and auto-generates required use statements
+- **Command-Based Architecture**: Easily create and manage reusable code generation commands
 
-return PhpGenConfig::configure()
-    ->withCommands([
-        LaravelCqrsQueryCommand::class,
-    ])
-    ->withComposerAutoload()  // Load PSR-4 mappings from composer.json
-    ->withStrictTypes(true);
-```
+CLI is built on [symfony/console](https://github.com/symfony/console).
 
-2. **Generate code using the CLI**:
+### MCP (Model Context Protocol) Support
 
-```bash
-# Generate a CQRS Query pattern
-vendor/bin/php-gen query:generate GetUser User
+Integrates with Claude Code/Claude Desktop for AI-assisted code generation:
 
-# Preview what would be generated (dry-run)
-vendor/bin/php-gen query:generate GetUser User --dry-run
+- Automatically exposes Symfony commands as MCP tools
+- Execute code generation commands directly from prompts
+- Project-specific code generation available from AI assistants
 
-# See detailed preview with file contents
-vendor/bin/php-gen query:generate GetUser User --dry-run -v
-```
+## =� Quick Start
 
-## 📋 Table of Contents
-
-- [Installation & Setup](#-installation--setup)
-- [Built-in Commands](#-built-in-commands)
-- [Creating Custom Commands](#-creating-custom-commands)
-- [Configuration](#-configuration)
-- [Examples](#-examples)
-- [Advanced Usage](#-advanced-usage)
-- [Troubleshooting](#-troubleshooting)
-
-## 🛠 Installation & Setup
-
-### 1. Install via Composer
-
-```bash
-composer require php-gen/class-generator
-```
-
-### 2. Create Configuration File
+### 1. Create Configuration File
 
 Create `phpgen.php` in your project root:
 
 ```php
 <?php
 
-use PhpGen\ClassGenerator\Config\PhpGenConfig;use PhpGen\ClassGenerator\Console\Commands\LaravelCqrsQueryCommand;
+use PhpGen\ClassGenerator\Config\PhpGenConfig;
+use PhpGen\ClassGenerator\Console\Commands\Example\Laravel\LaravelCqrsQueryCommand;
 
 return PhpGenConfig::configure()
     ->withCommands([
         LaravelCqrsQueryCommand::class,
-        // Add your custom commands here
     ])
-    ->withComposerAutoload()  // Automatically load from composer.json
-    ->withPsr4Mapping('App\\', 'app')  // Additional mappings
-    ->withStrictTypes(true);
+    ->withComposerAutoload()  // Load PSR-4 mappings from composer.json
+    ->withStrictTypes(true);  // Add strict types to generated code
+```
+
+### 2. Generate Code Using CLI
+
+```bash
+# Generate CQRS Query pattern
+vendor/bin/php-gen query:generate User GetUserById
+
+# Preview generation (dry run)
+vendor/bin/php-gen query:generate User GetUserById --dry-run
+
+# Detailed preview with file contents
+vendor/bin/php-gen query:generate User GetUserById --dry-run -v
 ```
 
 ### 3. Verify Installation
@@ -82,155 +71,95 @@ return PhpGenConfig::configure()
 vendor/bin/php-gen --help
 ```
 
-## 🎯 Built-in Commands
+## =� Installation & Setup
 
-### Laravel CQRS Query Generator
+### Installation
 
-Generates a complete CQRS Query pattern for Laravel applications.
+**Coming Soon**: This project is in draft stage. It is not currently available via Composer.
+
+### Setup Steps
+
+1. **Create Configuration File** (`phpgen.php`)
+2. **Configure PSR-4 Mapping** (can be auto-loaded from composer.json)
+3. **Register Commands**
+
+## <� Built-in Commands
+
+The following commands are available:
+
+- **query:generate** - Laravel CQRS Query pattern
+- **command:generate** - Laravel CQRS Command pattern
+- **dto:create** - DTO classes
+- **class:create** - Simple classes
+
+See `src/Console/Commands/` for details.
+
+### Usage Examples
 
 ```bash
-vendor/bin/php-gen query:generate GetUser User
+# Generate CQRS Query pattern
+vendor/bin/php-gen query:generate User GetUserById
+
+# Generate DTO
+vendor/bin/php-gen dto:create "App\\DTOs\\UserDto" --properties="id:int,name:string"
+
+# Verify with dry run
+vendor/bin/php-gen query:generate User GetUserById --dry-run -v
 ```
 
-**Generated files:**
-- `app/Contracts/User/Query/GetUserQuery.php` - Query data class
-- `app/Contracts/User/Result/GetUserResult.php` - Result data class
-- `app/Contracts/Queries/User/GetUserQueryHandler.php` - Interface with Laravel Bind attribute
-- `app/Infrastructure/Queries/User/GetUserQueryImplementation.php` - Implementation
-- `tests/Feature/Contracts/User/Query/GetUserQueryTest.php` - PHPUnit test
+## =' Creating Custom Commands
 
-**Options:**
-- `--no-query` - Skip generating the Query class
-- `--dry-run` - Preview without creating files
-- `-v` - Show detailed preview
-
-## 🔧 Creating Custom Commands
-
-### Step 1: Create Your Command Class
+### Basic Pattern
 
 ```php
 <?php
 
 namespace App\Commands;
 
-use Nette\PhpGenerator\ClassType;
-use PhpGen\ClassGenerator\Builder\Builder;
+use PhpGen\ClassGenerator\Blueprint\FileBlueprint;
 use PhpGen\ClassGenerator\Console\Commands\Command;
+use PhpGen\ClassGenerator\Core\Project;
 use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-#[AsCommand(
-    name: 'generate:model',
-    description: 'Generate an Eloquent model with relationships'
-)]
-final class ModelGeneratorCommand extends Command
+#[AsCommand(name: 'generate:service', description: 'Generate service class')]
+final class ServiceGeneratorCommand extends Command
 {
-    protected function configureCommand(): void
+    protected function handle(InputInterface $input, OutputInterface $output): Project
     {
-        $this->addArgument('name', InputArgument::REQUIRED, 'Model name');
-    }
+        $project = new Project();
 
-    protected function handle(InputInterface $input, OutputInterface $output): void
-    {
-        $modelName = $input->getArgument('name');
-        $builder = $this->getBuilder();
+        // Add files to generate
+        $project->add(
+            FileBlueprint::createEmptyClass('App\\Services\\UserService')
+                ->defineStructure(function ($class) {
+                    $class->setFinal();
+                    $class->addMethod('__construct')->setPublic();
+                    return $class;
+                })
+        );
 
-        // Add your model generation logic
-        $builder->add($this->createModel($modelName));
-        $builder->add($this->createFactory($modelName));
-        $builder->add($this->createMigration($modelName));
-    }
-
-    private function createModel(string $modelName): Builder
-    {
-        $className = $this->config->resolveNamespace("Models\\{$modelName}");
-
-        return Builder::createClass($className)
-            ->defineStructure(function (ClassType $class) use ($modelName) {
-                $class->setExtends('Illuminate\\Database\\Eloquent\\Model')
-                      ->setFinal();
-
-                // Add properties and methods
-                $class->addProperty('fillable', [])
-                      ->setProtected()
-                      ->setType('array')
-                      ->addComment('@var array<string>');
-
-                return $class;
-            });
-    }
-
-    private function createFactory(string $modelName): Builder
-    {
-        $className = $this->config->resolveNamespace("Database\\Factories\\{$modelName}Factory");
-
-        return Builder::createClass($className)
-            ->defineStructure(function (ClassType $class) use ($modelName) {
-                $class->setExtends('Illuminate\\Database\\Eloquent\\Factories\\Factory');
-
-                // Add definition method
-                $class->addMethod('definition')
-                      ->setReturnType('array')
-                      ->setBody('return [
-            // TODO: Add factory definitions
-        ];');
-
-                return $class;
-            });
-    }
-
-    private function createMigration(string $modelName): Builder
-    {
-        $tableName = strtolower($modelName) . 's';
-        $className = $this->config->resolveNamespace("Database\\Migrations\\Create{$modelName}sTable");
-
-        return Builder::createClass($className)
-            ->defineStructure(function (ClassType $class) use ($tableName) {
-                $class->setExtends('Illuminate\\Database\\Migrations\\Migration');
-
-                // Add up method
-                $class->addMethod('up')
-                      ->setReturnType('void')
-                      ->setBody("Schema::create('{$tableName}', function (Blueprint \$table) {
-            \$table->id();
-            // TODO: Add table columns
-            \$table->timestamps();
-        });");
-
-                // Add down method
-                $class->addMethod('down')
-                      ->setReturnType('void')
-                      ->setBody("Schema::dropIfExists('{$tableName}');");
-
-                return $class;
-            });
+        return $project;
     }
 }
 ```
 
-### Step 2: Register Your Command
-
-Add to your `phpgen.php`:
+### Registering Commands
 
 ```php
+// phpgen.php
 return PhpGenConfig::configure()
     ->withCommands([
-        \PhpGen\ClassGenerator\Console\Commands\LaravelCqrsQueryCommand::class,
-        \App\Commands\ModelGeneratorCommand::class,  // Your custom command
+        \App\Commands\ServiceGeneratorCommand::class,
     ])
     ->withComposerAutoload()
     ->withStrictTypes(true);
 ```
 
-### Step 3: Use Your Command
+See `src/Console/Commands/Example/Laravel/` for detailed implementation examples.
 
-```bash
-vendor/bin/php-gen generate:model User --dry-run
-```
-
-## ⚙️ Configuration
+## � Configuration
 
 ### PSR-4 Mapping Management
 
@@ -238,17 +167,17 @@ Handle complex namespace scenarios with priority mappings:
 
 ```php
 return PhpGenConfig::configure()
-    ->withComposerAutoload()  // Load composer.json mappings
-    ->withPsr4Mapping('App\\', 'app')  // Normal mapping
-    ->withPriorityPsr4Mapping('Tests\\', 'tests')  // Override composer mapping
+    ->withComposerAutoload()  // Load mappings from composer.json
+    ->withPsr4Mapping('App\\', 'app')  // Regular mapping
+    ->withPriorityPsr4Mapping('Tests\\', 'tests')  // Override composer.json mapping
     ->withPriorityPsr4Mapping('Legacy\\', 'legacy')  // Handle legacy code
     ->withStrictTypes(true);
 ```
 
 **Mapping Rules:**
-- Priority mappings override normal mappings
-- Duplicates within same priority level cause errors
-- Duplicates between priority levels are allowed (priority wins)
+- Priority mappings override regular mappings
+- Duplicates within the same priority level cause errors
+- Duplicates between different priority levels are allowed (priority wins)
 
 ### Configuration Methods
 
@@ -261,230 +190,93 @@ PhpGenConfig::configure()
     ->withStrictTypes(bool)                  // Enable/disable strict types
 ```
 
-## 📚 Examples
+## = MCP Server Integration
 
-### Example 1: Simple DTO Generator
+PhpGen works as an MCP (Model Context Protocol) server and can be used directly from Claude Code or Claude Desktop.
 
-```php
-#[AsCommand(name: 'generate:dto', description: 'Generate a DTO class')]
-final class DtoGeneratorCommand implements CommandInterface
-{
-    public function handle(InputInterface $input, OutputInterface $output): int
-    {
-        $name = $input->getArgument('name');
+### Architecture
 
-        $this->generationBuilder->add(
-            $this->createClassBuilder("App\\DTOs\\{$name}DTO")
-                ->configure(function ($class) {
-                    $class->setFinal()
-                          ->setReadOnly()
-                          ->addMethod('__construct')
-                          ->setPublic();
-                    return $class;
-                })
-        );
+Built on the [php-mcp/server](https://github.com/php-mcp/server) library, automatically exposing existing Symfony commands as MCP tools.
 
-        return $this->generationBuilder->build()->generate();
-    }
-}
-```
+### Starting the Server
 
-### Example 2: API Resource Generator
-
-```php
-#[AsCommand(name: 'generate:resource', description: 'Generate API resource')]
-final class ResourceGeneratorCommand implements CommandInterface
-{
-    private function defineGeneration(GenerationBuilder $builder, InputInterface $input, SymfonyStyle $io): void
-    {
-        $name = $input->getArgument('name');
-
-        // Generate Resource
-        $builder->add($this->createResource($name));
-
-        // Generate Collection
-        $builder->add($this->createCollection($name));
-
-        // Generate Test
-        $builder->add($this->createResourceTest($name));
-    }
-
-    private function createResource(string $name): Builder
-    {
-        return $this->createClassBuilder("App\\Http\\Resources\\{$name}Resource")
-            ->configure(function ($class) {
-                $class->setExtends('Illuminate\\Http\\Resources\\Json\\JsonResource');
-
-                $class->addMethod('toArray')
-                      ->setReturnType('array')
-                      ->addParameter('request')
-                      ->setBody('return parent::toArray($request);');
-
-                return $class;
-            });
-    }
-}
-```
-
-### Example 3: Full CRUD Generator
-
-```php
-#[AsCommand(name: 'generate:crud', description: 'Generate complete CRUD')]
-final class CrudGeneratorCommand implements CommandInterface
-{
-    private function defineGeneration(GenerationBuilder $builder, InputInterface $input, SymfonyStyle $io): void
-    {
-        $name = $input->getArgument('name');
-
-        // Model
-        $builder->add($this->createModel($name));
-
-        // Controller
-        $builder->add($this->createController($name));
-
-        // Requests
-        $builder->add($this->createStoreRequest($name));
-        $builder->add($this->createUpdateRequest($name));
-
-        // Resource
-        $builder->add($this->createResource($name));
-
-        // Tests
-        $builder->add($this->createControllerTest($name));
-
-        // Migration
-        $builder->add($this->createMigration($name));
-    }
-}
-```
-
-## 🔍 Advanced Usage
-
-### Custom Builder Patterns
-
-```php
-// Create your own builder helpers
-trait BuilderHelpers
-{
-    protected function createLaravelModel(string $name): Builder
-    {
-        return $this->createClassBuilder("App\\Models\\{$name}")
-            ->addUse('Illuminate\\Database\\Eloquent\\Model')
-            ->configure(function ($class) {
-                $class->setExtends('Model')->setFinal();
-                return $class;
-            });
-    }
-
-    protected function createLaravelController(string $name): Builder
-    {
-        return $this->createClassBuilder("App\\Http\\Controllers\\{$name}Controller")
-            ->addUse('Illuminate\\Http\\Request')
-            ->addUse('App\\Http\\Controllers\\Controller')
-            ->configure(function ($class) {
-                $class->setExtends('Controller');
-                return $class;
-            });
-    }
-}
-```
-
-### Dynamic Configuration
-
-```php
-// Environment-specific configuration
-$env = $_ENV['APP_ENV'] ?? 'development';
-
-$config = PhpGenConfig::configure()
-    ->withCommands([LaravelCqrsQueryCommand::class]);
-
-if ($env === 'development') {
-    $config->withPsr4Mapping('Dev\\', 'dev-tools');
-}
-
-return $config->withComposerAutoload();
-```
-
-### Conditional Generation
-
-```php
-private function defineGeneration(GenerationBuilder $builder, InputInterface $input, SymfonyStyle $io): void
-{
-    $name = $input->getArgument('name');
-
-    // Always generate model
-    $builder->add($this->createModel($name));
-
-    // Conditionally generate API resources
-    if ($input->getOption('with-api')) {
-        $builder->add($this->createResource($name));
-        $builder->add($this->createController($name));
-    }
-
-    // Conditionally generate tests
-    if (!$input->getOption('no-tests')) {
-        $builder->add($this->createTest($name));
-    }
-}
-```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**1. "No PSR-4 mappings configured" Error**
-```php
-// Ensure you have at least one mapping
-return PhpGenConfig::configure()
-    ->withPsr4Mapping('App\\', 'app')  // Add this
-    ->withCommands([...]);
-```
-
-**2. "Duplicate directory" Error**
-```php
-// Use priority mappings to resolve conflicts
-return PhpGenConfig::configure()
-    ->withComposerAutoload()
-    ->withPriorityPsr4Mapping('Tests\\', 'tests')  // Override composer mapping
-    ->withCommands([...]);
-```
-
-**3. Command Not Found**
-```php
-// Make sure your command is registered
-return PhpGenConfig::configure()
-    ->withCommands([
-        YourCommand::class,  // Add your command class
-    ]);
-```
-
-**4. Files Not Generated in Expected Location**
 ```bash
-# Check your PSR-4 mappings
-vendor/bin/php-gen your:command --dry-run -v
+# Start MCP server
+./bin/php-gen mcp:server
+
+# Specify custom configuration file
+./bin/php-gen mcp:server --config-path=/path/to/phpgen.php
 ```
+
+### Claude Desktop Configuration
+
+Add to Claude Desktop configuration file (macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "phpgen": {
+      "command": "/absolute/path/to/your/project/bin/php-gen",
+      "args": ["mcp:server"]
+    }
+  }
+}
+```
+
+### Available MCP Tools
+
+Commands configured in your configuration file are available to AI via MCP.
+
+**Note**: All tools are automatically generated from Symfony commands registered in `phpgen.php`.
+
+### Usage Example with Claude Code
+
+```
+You: Generate a CQRS query for User context
+
+Claude: I'll generate code using the query_generate tool...
+```
+
+## =� Architecture
+
+### Core Generation Flow
+
+```
+Command � Project � FileBlueprint � Generator � CodeWriter
+```
+
+- **Command**: Processes command-line input and defines files to generate
+- **Project**: Collects multiple FileBlueprints
+- **FileBlueprint**: Defines class/interface/enum structure
+- **Generator**: Generates code using Nette PHP Generator
+- **CodeWriter**: Writes files to disk
+
+See the `src/` directory for details.
+
+## = Troubleshooting
 
 ### Debug Mode
 
-Use verbose dry-run to debug generation:
-
 ```bash
+# Verify generation with detailed dry run
 vendor/bin/php-gen your:command --dry-run -v
 ```
 
-This shows:
-- Configuration settings
-- PSR-4 mappings
-- Generated file paths
-- Complete file contents
+### Common Errors
 
-### Validation
+**"No PSR-4 mappings configured"**
+```php
+// Add at least one mapping
+return PhpGenConfig::configure()
+    ->withPsr4Mapping('App\\', 'app')
+    ->withCommands([...]);
+```
 
-The library automatically validates:
-- Command class existence
-- PSR-4 mapping conflicts
-- Required configuration
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) for details.
+**"Duplicate directory"**
+```php
+// Resolve with priority mapping
+return PhpGenConfig::configure()
+    ->withComposerAutoload()
+    ->withPriorityPsr4Mapping('Tests\\', 'tests')
+    ->withCommands([...]);
+```

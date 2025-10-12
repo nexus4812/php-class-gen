@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhpGen\ClassGenerator\Builder;
+namespace PhpGen\ClassGenerator\Blueprint;
 
 use Nette\PhpGenerator\InterfaceType;
 use Nette\PhpGenerator\ClassType;
@@ -16,7 +16,7 @@ use InvalidArgumentException;
  * (class, interface, or trait) including its fully qualified name, use statements,
  * and configuration callback.
  */
-final class ElementSpec
+final class ElementBlueprint
 {
     /**
      * @param string $fullyQualifiedName The fully qualified name of the element

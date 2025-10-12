@@ -37,8 +37,7 @@ final class ComposerReader
         $psr4Mappings = [];
 
         // Read from autoload.psr-4
-        if (isset($composer['autoload']) && is_array($composer['autoload']) &&
-            isset($composer['autoload']['psr-4']) && is_array($composer['autoload']['psr-4'])) {
+        if (isset($composer['autoload']) && is_array($composer['autoload']) && isset($composer['autoload']['psr-4']) && is_array($composer['autoload']['psr-4'])) {
             foreach ($composer['autoload']['psr-4'] as $namespace => $path) {
                 if (is_string($namespace)) {
                     $psr4Mappings[$namespace] = self::normalizePath($path);
@@ -47,8 +46,7 @@ final class ComposerReader
         }
 
         // Read from autoload-dev.psr-4
-        if (isset($composer['autoload-dev']) && is_array($composer['autoload-dev']) &&
-            isset($composer['autoload-dev']['psr-4']) && is_array($composer['autoload-dev']['psr-4'])) {
+        if (isset($composer['autoload-dev']) && is_array($composer['autoload-dev']) && isset($composer['autoload-dev']['psr-4']) && is_array($composer['autoload-dev']['psr-4'])) {
             foreach ($composer['autoload-dev']['psr-4'] as $namespace => $path) {
                 if (is_string($namespace)) {
                     $psr4Mappings[$namespace] = self::normalizePath($path);

@@ -18,6 +18,7 @@ parameters:
         - src
         - phpgen.php
         - bin
+        - tests/Architecture
     excludePaths:
         - generated/ (?)
         - src/App/ (?)

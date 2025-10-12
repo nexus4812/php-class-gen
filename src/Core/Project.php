@@ -5,51 +5,23 @@ declare(strict_types=1);
 namespace PhpGen\ClassGenerator\Core;
 
 use PhpGen\ClassGenerator\Config\PhpGenConfig;
-use PhpGen\ClassGenerator\Builder\Builder;
-use PhpGen\ClassGenerator\Builder\BuilderInterface;
+use PhpGen\ClassGenerator\Blueprint\FileBlueprint;
 use RuntimeException;
 use Throwable;
 
-/**
- * Builder for fine-grained control over file generation
- *
- * This class implements the Builder pattern to provide flexible control
- * over which files are generated and under what conditions. It allows
- * generators to define multiple file types and conditional generation logic.
- *
- * @example Usage in a generator:
- * protected function defineGeneration(GenerationBuilder $builder): void
- * {
- *     $builder
- *         ->addClass('interface', fn() => $this->createInterface())
- *         ->addClass('implementation', fn() => $this->createImplementation())
- *         ->addClass('test', fn() => $this->createTest())
- *         ->when('test', fn() => !$this->context->getOption('skip-tests'))
- *         ->when('interface', fn() => $this->context->getOption('with-interface'));
- * }
- */
-class GenerationCollection
+class Project
 {
-    private PhpGenConfig $config;
-
     /**
      * @var array<string, callable> Factory functions for each file type
      */
     private array $factories = [];
 
 
-    public function __construct(PhpGenConfig $config)
+    public function __construct()
     {
-        $this->config = $config;
     }
 
-    /**
-     * Add a pre-configured builder directly to the generation
-     *
-     * @param Builder $builder Pre-configured UniversalBuilder instance
-     * @return void
-     */
-    private function addBuilder(Builder $builder): void
+    private function addBuilder(FileBlueprint $builder): void
     {
         $fullyQualifiedName = $builder->getFullyQualifiedName();
 
@@ -65,17 +37,7 @@ class GenerationCollection
         $this->factories[$uniqueKey] = fn () => $builder;
     }
 
-    /**
-     * Add a pre-configured builder to the generation
-     *
-     * This is the unified API for adding any type of code generation.
-     * The UniversalBuilder already contains the type information (interface, class, trait)
-     * so no additional type specification is needed.
-     *
-     * @param Builder $builder Pre-configured UniversalBuilder instance
-     * @return self Returns the builder instance for method chaining
-     */
-    public function add(Builder $builder): self
+    public function add(FileBlueprint $builder): self
     {
         $this->addBuilder($builder);
         return $this;
@@ -86,9 +48,9 @@ class GenerationCollection
      *
      * @return Generator The configured generator ready for execution
      */
-    public function build(): Generator
+    public function build(PhpGenConfig $config): Generator
     {
-        $generator = Generator::create($this->config);
+        $generator = Generator::create($config);
 
         // Process in the order they were added
         foreach (array_keys($this->factories) as $type) {
@@ -105,9 +67,9 @@ class GenerationCollection
      * Create a builder using the factory function
      *
      * @param string $type The file type identifier
-     * @return BuilderInterface|null The created builder or null if creation failed
+     * @return FileBlueprint|null The created builder or null if creation failed
      */
-    private function createBuilder(string $type): ?BuilderInterface
+    private function createBuilder(string $type): ?FileBlueprint
     {
         if (!isset($this->factories[$type])) {
             return null;
@@ -122,9 +84,9 @@ class GenerationCollection
                 return null;
             }
 
-            if (!$result instanceof BuilderInterface) {
+            if (!$result instanceof FileBlueprint) {
                 throw new RuntimeException(
-                    "Factory for file type '{$type}' must return a BuilderInterface instance, got " .
+                    "Factory for file type '{$type}' must return a FileBlueprint instance, got " .
                     (is_object($result) ? $result::class : gettype($result))
                 );
             }

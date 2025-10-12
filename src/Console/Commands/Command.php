@@ -6,7 +6,7 @@ namespace PhpGen\ClassGenerator\Console\Commands;
 
 use InvalidArgumentException;
 use PhpGen\ClassGenerator\Config\PhpGenConfig;
-use PhpGen\ClassGenerator\Core\GenerationCollection;
+use PhpGen\ClassGenerator\Core\Project;
 use PhpGen\ClassGenerator\Core\Generator;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,7 +18,6 @@ use Throwable;
 abstract class Command extends SymfonyCommand
 {
     protected PhpGenConfig $config;
-    protected GenerationCollection $builder;
 
     public function __construct(PhpGenConfig $config)
     {
@@ -35,19 +34,9 @@ abstract class Command extends SymfonyCommand
      *
      * @param InputInterface $input The command input
      * @param OutputInterface $output
-     * @return void
+     * @return Project
      */
-    abstract protected function handle(InputInterface $input, OutputInterface $output): void;
-
-    /**
-     * Get the generation builder
-     *
-     * @return GenerationCollection The generation builder
-     */
-    protected function getBuilder(): GenerationCollection
-    {
-        return $this->builder;
-    }
+    abstract protected function handle(InputInterface $input, OutputInterface $output): Project;
 
     final protected function configure(): void
     {
@@ -73,24 +62,13 @@ abstract class Command extends SymfonyCommand
         try {
             // Validate configuration
             $this->config->validate();
-
-            // Get generation parameters
-            $isDryRun = $input->getOption('dry-run');
-
-            // Display configuration info in verbose mode
             if ($output->isVerbose()) {
                 $this->displayConfigurationInfo($io);
             }
 
-            // Build generation configuration
-            $this->builder = new GenerationCollection($this->config);
-            $this->handle($input, $output);
+            $generator = $this->handle($input, $output)->build($this->config);
 
-            // Create generator
-            $generator = $this->builder->build();
-
-            // Execute generation or preview
-            return $isDryRun
+            return $input->getOption('dry-run')
                 ? $this->executePreview($generator, $io)
                 : $this->executeGeneration($generator, $io);
 

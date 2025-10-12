@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use PhpGen\ClassGenerator\Config\PhpGenConfig;
+use PhpGen\ClassGenerator\Console\Commands\CreateClassCommand;
 use PhpGen\ClassGenerator\Console\Commands\CreateDtoCommand;
-use PhpGen\ClassGenerator\Console\Commands\LaravelCqrsQueryCommand;
+use PhpGen\ClassGenerator\Console\Commands\Example\Laravel\LaravelCqrsCommandCommand;
+use PhpGen\ClassGenerator\Console\Commands\Example\Laravel\LaravelCqrsQueryCommand;
 
 /**
  * PhpGen Configuration File
@@ -14,8 +16,10 @@ use PhpGen\ClassGenerator\Console\Commands\LaravelCqrsQueryCommand;
  */
 return PhpGenConfig::configure()
     ->withCommands([
+        LaravelCqrsCommandCommand::class,
         LaravelCqrsQueryCommand::class,
-        CreateDtoCommand::class
+        CreateDtoCommand::class,
+        CreateClassCommand::class,
     ])
     ->withComposerAutoload() // Automatically loads PSR-4 mappings from composer.json
     ->withPsr4Mapping('App\\', 'app') // Additional custom mapping (overrides composer.json if needed)
