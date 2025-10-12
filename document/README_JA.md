@@ -32,6 +32,13 @@ Claude Code/Claude Desktopと統合し、AI支援によるコード生成が可�
 - プロンプトからコード生成コマンドを直接実行
 - プロジェクト固有のコード生成をAIアシスタントから利用可能
 
+
+### インストール
+
+```sh
+composer require --dev nexus4812/php-class-gen
+```
+
 ## 🚀 クイックスタート
 
 ### 1. 設定ファイルの作成
@@ -71,11 +78,7 @@ vendor/bin/php-gen query:generate User GetUserById --dry-run -v
 vendor/bin/php-gen --help
 ```
 
-## 🛠 インストール & セットアップ
-
-### インストール
-
-**準備中**: このプロジェクトはドラフト段階です。現在Composer経由ではインストールできません。
+## 🛠 セットアップ
 
 ### セットアップ手順
 

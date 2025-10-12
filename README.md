@@ -32,6 +32,12 @@ Integrates with Claude Code/Claude Desktop for AI-assisted code generation:
 - Execute code generation commands directly from prompts
 - Project-specific code generation available from AI assistants
 
+### Installation
+
+```sh
+composer require --dev nexus4812/php-class-gen
+```
+
 ## Quick Start
 
 ### 1. Create Configuration File
@@ -71,11 +77,7 @@ vendor/bin/php-gen query:generate User GetUserById --dry-run -v
 vendor/bin/php-gen --help
 ```
 
-## =� Installation & Setup
-
-### Installation
-
-**Coming Soon**: This project is in draft stage. It is not currently available via Composer.
+## Setup
 
 ### Setup Steps
 
