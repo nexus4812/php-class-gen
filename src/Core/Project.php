@@ -6,7 +6,6 @@ namespace PhpGen\ClassGenerator\Core;
 
 use PhpGen\ClassGenerator\Config\PhpGenConfig;
 use PhpGen\ClassGenerator\Blueprint\FileBlueprint;
-use PhpGen\ClassGenerator\Blueprint\BlueprintInterface;
 use RuntimeException;
 use Throwable;
 
@@ -68,9 +67,9 @@ class Project
      * Create a builder using the factory function
      *
      * @param string $type The file type identifier
-     * @return BlueprintInterface|null The created builder or null if creation failed
+     * @return FileBlueprint|null The created builder or null if creation failed
      */
-    private function createBuilder(string $type): ?BlueprintInterface
+    private function createBuilder(string $type): ?FileBlueprint
     {
         if (!isset($this->factories[$type])) {
             return null;
@@ -85,9 +84,9 @@ class Project
                 return null;
             }
 
-            if (!$result instanceof BlueprintInterface) {
+            if (!$result instanceof FileBlueprint) {
                 throw new RuntimeException(
-                    "Factory for file type '{$type}' must return a BlueprintInterface instance, got " .
+                    "Factory for file type '{$type}' must return a FileBlueprint instance, got " .
                     (is_object($result) ? $result::class : gettype($result))
                 );
             }

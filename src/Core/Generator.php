@@ -6,7 +6,7 @@ namespace PhpGen\ClassGenerator\Core;
 
 use Nette\PhpGenerator\PhpFile;
 use PhpGen\ClassGenerator\Config\PhpGenConfig;
-use PhpGen\ClassGenerator\Blueprint\BlueprintInterface;
+use PhpGen\ClassGenerator\Blueprint\FileBlueprint;
 use PhpGen\ClassGenerator\Generation\CodeWriter;
 use PhpGen\ClassGenerator\Generation\FileComposer;
 
@@ -39,7 +39,7 @@ final class Generator
 
     /**
      * Unified collection of all builders for streamlined processing
-     * @var array<string, BlueprintInterface>
+     * @var array<string, FileBlueprint>
      */
     private array $builders = [];
 
@@ -75,10 +75,10 @@ final class Generator
      * This method allows adding builders that have been created and configured
      * outside of the generator, providing more flexibility in builder creation.
      *
-     * @param BlueprintInterface $builder The configured builder to add
+     * @param FileBlueprint $builder The configured builder to add
      * @return self Returns the generator instance for method chaining
      */
-    public function addBuilder(BlueprintInterface $builder): self
+    public function addBuilder(FileBlueprint $builder): self
     {
         $this->builders[$builder->getFullyQualifiedName()] = $builder;
         return $this;

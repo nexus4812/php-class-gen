@@ -20,7 +20,7 @@ use PhpGen\ClassGenerator\Generation\FileComposer;
  * with use statements and configuration callbacks. It acts as a facade
  * over ElementBlueprint and FileComposer classes.
  */
-final class FileBlueprint implements BlueprintInterface
+final class FileBlueprint
 {
     private ElementBlueprint $spec;
     private bool $autoGenerateUses = true;
@@ -28,7 +28,7 @@ final class FileBlueprint implements BlueprintInterface
 
     /**
      * @param string $fullyQualifiedName
-     * @param string $netteTypeClass
+     * @param class-string<ClassLike> $netteTypeClass
      * @param DependencyAnalyzer|null $dependencyAnalyzer
      */
     public function __construct(string $fullyQualifiedName, string $netteTypeClass, ?DependencyAnalyzer $dependencyAnalyzer = null)
@@ -73,12 +73,23 @@ final class FileBlueprint implements BlueprintInterface
         return $bluePrint;
     }
 
-    public static function createEnum(string $fullyQualifiedName): self
+    public static function createEmptyEnum(string $fullyQualifiedName): self
     {
         return new FileBlueprint($fullyQualifiedName, EnumType::class);
     }
 
+    /**
+     * @param string $fullyQualifiedName
+     * @param callable(EnumType): EnumType $structure
+     * @return self
+     */
+    public static function createEnum(string $fullyQualifiedName, callable $structure): self
+    {
+        $bluePrint = self::createEmptyEnum($fullyQualifiedName);
+        $bluePrint->defineStructure($structure);
 
+        return $bluePrint;
+    }
 
     /**
      * Add a use statement to the file
@@ -95,7 +106,7 @@ final class FileBlueprint implements BlueprintInterface
      */
     public function addUsesForClasses(array $classNames): self
     {
-        $filteredClasses = array_filter($classNames, fn ($class) => !empty($class));
+        $filteredClasses = array_filter($classNames, fn($class) => !empty($class));
         $uniqueClasses = array_unique($filteredClasses);
 
         foreach ($uniqueClasses as $className) {
