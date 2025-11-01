@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace PhpGen\ClassGenerator\Mcp\Server;
 
-use PhpGen\ClassGenerator\Console\Commands\McpServerCommand;
 use PhpGen\ClassGenerator\Mcp\Adapters\PhpGenConfigLoader;
 use PhpGen\ClassGenerator\Mcp\Adapters\SymfonyCommandAdapter;
 use PhpGen\ClassGenerator\Mcp\CommandDiscovery;
 use PhpMcp\Server\Server;
 use PhpMcp\Server\Transports\StdioServerTransport;
+use RuntimeException;
 
 /**
  * PhpGen MCP Server using php-mcp/server library
@@ -122,7 +122,7 @@ final class PhpGenMcpServer
         // when listen() is called
 
         // For now, we'll throw an exception as this needs the transport layer
-        throw new \RuntimeException(
+        throw new RuntimeException(
             'Direct request processing is not supported. Use listen() method instead.'
         );
     }

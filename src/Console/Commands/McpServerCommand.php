@@ -11,6 +11,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Throwable;
 
 /**
  * MCP Server Command (using php-mcp/server)
@@ -67,7 +68,7 @@ class McpServerCommand extends SymfonyCommand
             $server = PhpGenMcpServer::create($configPath);
             $server->listen();
 
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Errors go to stderr
             fwrite(STDERR, "\n[ERROR] Failed to start MCP server:\n");
             fwrite(STDERR, $e->getMessage() . "\n");

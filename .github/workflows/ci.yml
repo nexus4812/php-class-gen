@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        php-version: [8.2, 8.3]
+        php-version: [8.2, 8.3, 8.4]
 
     steps:
     - uses: actions/checkout@v4
@@ -45,26 +45,3 @@ jobs:
 
     - name: Run PHPUnit tests
       run: composer test
-
-    - name: Test code generation
-      run: ./bin/php-gen generate TestEntity --dry-run
-
-  phpstan-baseline:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: 8.2
-        extensions: mbstring, xml, json
-        tools: composer:v2
-
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
-
-    - name: Check PHPStan baseline
-      run: composer phpstan

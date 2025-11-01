@@ -168,37 +168,37 @@ class LaravelCqrsCommandCommand extends Command
 
                 if ($returnType === 'int') {
                     $handle->setBody(<<<'PHP'
-// TODO: Implement command logic (INSERT/UPDATE/DELETE)
-// Example for INSERT:
-// $this->connection->table('users')->insert([
-//     'name' => $command->name,
-//     'email' => $command->email,
-// ]);
-// return (int) $this->connection->getPdo()->lastInsertId();
+                        // TODO: Implement command logic (INSERT/UPDATE/DELETE)
+                        // Example for INSERT:
+                        // $this->connection->table('users')->insert([
+                        //     'name' => $command->name,
+                        //     'email' => $command->email,
+                        // ]);
+                        // return (int) $this->connection->getPdo()->lastInsertId();
 
-// For transactions:
-// return $this->connection->transaction(function () use ($command) {
-//     $this->connection->table('users')->insert([...]);
-//     return (int) $this->connection->getPdo()->lastInsertId();
-// });
+                        // For transactions:
+                        // return $this->connection->transaction(function () use ($command) {
+                        //     $this->connection->table('users')->insert([...]);
+                        //     return (int) $this->connection->getPdo()->lastInsertId();
+                        // });
 
-throw new \RuntimeException('Not implemented');
-PHP);
+                        throw new \RuntimeException('Not implemented');
+                        PHP);
                 } else {
                     $handle->setBody(<<<'PHP'
-// TODO: Implement command logic (INSERT/UPDATE/DELETE)
-// Example for UPDATE/DELETE:
-// $this->connection->table('users')
-//     ->where('id', $command->id)
-//     ->update(['name' => $command->name]);
+                        // TODO: Implement command logic (INSERT/UPDATE/DELETE)
+                        // Example for UPDATE/DELETE:
+                        // $this->connection->table('users')
+                        //     ->where('id', $command->id)
+                        //     ->update(['name' => $command->name]);
 
-// For transactions:
-// $this->connection->transaction(function () use ($command) {
-//     $this->connection->table('users')->where(...)->update([...]);
-// });
+                        // For transactions:
+                        // $this->connection->transaction(function () use ($command) {
+                        //     $this->connection->table('users')->where(...)->update([...]);
+                        // });
 
-throw new \RuntimeException('Not implemented');
-PHP);
+                        throw new \RuntimeException('Not implemented');
+                        PHP);
                 }
 
                 if (!$input->getOption('no-command')) {

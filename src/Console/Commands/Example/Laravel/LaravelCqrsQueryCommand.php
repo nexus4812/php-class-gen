@@ -162,27 +162,27 @@ class LaravelCqrsQueryCommand extends Command
                 $handle->setReturnType(self::getResultName($input));
                 $handle->setComment('@inheritdoc');
                 $handle->setBody(<<<'PHP'
-// TODO: Implement query logic (SELECT)
-// Example for single record query:
-// $result = $this->connection->table('users')
-//     ->where('id', $query->id)
-//     ->first();
-//
-// if ($result === null) {
-//     throw new \RuntimeException('User not found');
-// }
-//
-// return new FindUserByIdResult(data: $result);
+                    // TODO: Implement query logic (SELECT)
+                    // Example for single record query:
+                    // $result = $this->connection->table('users')
+                    //     ->where('id', $query->id)
+                    //     ->first();
+                    //
+                    // if ($result === null) {
+                    //     throw new \RuntimeException('User not found');
+                    // }
+                    //
+                    // return new FindUserByIdResult(data: $result);
 
-// Example for collection query:
-// $results = $this->connection->table('users')
-//     ->where('status', 'active')
-//     ->get();
-//
-// return new FindActiveUsersResult(data: $results);
+                    // Example for collection query:
+                    // $results = $this->connection->table('users')
+                    //     ->where('status', 'active')
+                    //     ->get();
+                    //
+                    // return new FindActiveUsersResult(data: $results);
 
-throw new \RuntimeException('Not implemented');
-PHP);
+                    throw new \RuntimeException('Not implemented');
+                    PHP);
 
                 if (!$input->getOption('no-query')) {
                     $handle->addParameter('query')

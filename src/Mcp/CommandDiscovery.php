@@ -8,9 +8,7 @@ use PhpGen\ClassGenerator\Config\PhpGenConfig;
 use PhpGen\ClassGenerator\Console\Commands\Command;
 use ReflectionClass;
 use ReflectionException;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputDefinition;
-use Symfony\Component\Console\Input\InputOption;
 
 /**
  * Discovers and analyzes PhpGen commands for MCP integration
@@ -98,7 +96,7 @@ final class CommandDiscovery
             $paramName = $this->camelCase($argument->name);
             $properties[$paramName] = [
                 'type' => $this->mapArgumentType($argument),
-                'description' => $argument->description ?? "Argument: {$argument->name}"
+                'description' => $argument->description ?? "Argument: {$argument->name}",
             ];
 
             if ($argument->isRequired) {
@@ -111,7 +109,7 @@ final class CommandDiscovery
             $properties[$this->camelCase($option->name)] = [
                 'type' => $this->mapOptionType($option),
                 'description' => $option->description ?? "Option: {$option->name}",
-                'default' => $option->default
+                'default' => $option->default,
             ];
         }
 
@@ -119,7 +117,7 @@ final class CommandDiscovery
         $properties['dryRun'] = [
             'type' => 'boolean',
             'description' => 'Preview generated files without writing them',
-            'default' => false
+            'default' => false,
         ];
 
         return [
@@ -128,8 +126,8 @@ final class CommandDiscovery
             'inputSchema' => [
                 'type' => 'object',
                 'properties' => $properties,
-                'required' => $required
-            ]
+                'required' => $required,
+            ],
         ];
     }
 

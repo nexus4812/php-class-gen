@@ -11,6 +11,9 @@ use PhpGen\ClassGenerator\Mcp\ValidationResult;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Throwable;
+use Exception;
+use InvalidArgumentException;
+use RuntimeException;
 
 /**
  * Adapter to convert Symfony Console Commands to MCP tool handlers
@@ -88,7 +91,7 @@ final class SymfonyCommandAdapter
      * @param CommandMetadata $metadata Command metadata
      * @param array<string, mixed> $parameters Input parameters from MCP
      * @return array<string, mixed> Execution result
-     * @throws \Exception If command execution fails
+     * @throws Exception If command execution fails
      */
     private function executeCommand(Command $command, CommandMetadata $metadata, array $parameters): array
     {
@@ -96,7 +99,7 @@ final class SymfonyCommandAdapter
             // Validate parameters
             $validationResult = $this->validateParameters($metadata, $parameters);
             if (!$validationResult->isValid) {
-                throw new \InvalidArgumentException(
+                throw new InvalidArgumentException(
                     $validationResult->errorMessage ?? 'Validation failed'
                 );
             }
@@ -112,7 +115,7 @@ final class SymfonyCommandAdapter
             $exitCode = $command->run($input, $output);
 
             if ($exitCode !== 0) {
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     "Command execution failed with exit code: {$exitCode}\nOutput: " . $output->fetch()
                 );
             }
@@ -127,7 +130,7 @@ final class SymfonyCommandAdapter
             ];
 
         } catch (Throwable $e) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 "Command execution failed: " . $e->getMessage(),
                 0,
                 $e
@@ -230,7 +233,7 @@ final class SymfonyCommandAdapter
             if ($this->camelCase($argument->name) === $name) {
                 return [
                     'type' => $argument->isArray ? 'array' : 'string',
-                    'required' => $argument->isRequired
+                    'required' => $argument->isRequired,
                 ];
             }
         }
@@ -244,7 +247,7 @@ final class SymfonyCommandAdapter
                 }
                 return [
                     'type' => $type,
-                    'required' => false
+                    'required' => false,
                 ];
             }
         }
